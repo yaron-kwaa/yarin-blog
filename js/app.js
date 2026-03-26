@@ -603,6 +603,23 @@ function renderHome() {
 
   document.getElementById('main-content').innerHTML = html
   document.getElementById('nav-home').classList.add('active')
+
+  // מעקב חשיפת באנרים (Intersection Observer)
+  setTimeout(() => {
+    const banners = document.querySelectorAll('.video-banner')
+    if (banners.length && 'IntersectionObserver' in window) {
+      const bannerObs = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            const type = e.target.classList.contains('video-banner--square') ? 'kolorabi-square' : 'kolorabi-strip'
+            track('ad_impression', { banner: type, product: 'kolorabi', placement: type.includes('square') ? 'sidebar' : 'bottom_strip' })
+            bannerObs.unobserve(e.target)
+          }
+        })
+      }, { threshold: 0.5 })
+      banners.forEach(b => bannerObs.observe(b))
+    }
+  }, 100)
 }
 
 function setFilter(f) {
@@ -886,6 +903,7 @@ function renderShop() {
     if (!view) return
 
     if (shopState === 'browse') {
+      track('view_item', { product: 'kolorabi', price: 4.9, currency: 'ILS' })
       view.innerHTML = `
         <div class="shop__product">
           <div class="shop__img-wrap">
@@ -906,8 +924,8 @@ function renderShop() {
             <button class="shop__add-btn" id="add-to-cart">🛒 הוסף לסל</button>
           </div>
         </div>`
-      document.getElementById('qty-minus').onclick = () => { if (qty > 1) { qty--; renderView() } }
-      document.getElementById('qty-plus').onclick = () => { if (qty < 99) { qty++; renderView() } }
+      document.getElementById('qty-minus').onclick = () => { if (qty > 1) { qty--; track('shop_quantity_change', { product: 'kolorabi', quantity: qty - 1, direction: 'decrease' }); renderView() } }
+      document.getElementById('qty-plus').onclick = () => { if (qty < 99) { qty++; track('shop_quantity_change', { product: 'kolorabi', quantity: qty + 1, direction: 'increase' }); renderView() } }
       document.getElementById('add-to-cart').onclick = () => {
         track('shop_add_to_cart', { product: 'kolorabi', quantity: qty })
         shopState = 'cart'; renderView()
@@ -915,6 +933,7 @@ function renderShop() {
     }
 
     else if (shopState === 'cart') {
+      track('view_cart', { product: 'kolorabi', quantity: qty, subtotal: (qty * 4.9).toFixed(2), shipping: '15.00', total: (qty * 4.9 + 15).toFixed(2), currency: 'ILS' })
       view.innerHTML = `
         <div class="shop__cart">
           <h2 class="shop__step-title">🛒 הסל שלך</h2>
@@ -937,10 +956,11 @@ function renderShop() {
         track('shop_begin_checkout', { product: 'kolorabi', quantity: qty, total: (qty * 4.9 + 15).toFixed(2) })
         shopState = 'checkout'; renderView()
       }
-      document.getElementById('back-browse').onclick = () => { shopState = 'browse'; renderView() }
+      document.getElementById('back-browse').onclick = () => { track('shop_back_navigation', { from: 'cart', to: 'browse' }); shopState = 'browse'; renderView() }
     }
 
     else if (shopState === 'checkout') {
+      track('checkout_shipping_step', { product: 'kolorabi', quantity: qty, total: (qty * 4.9 + 15).toFixed(2), currency: 'ILS' })
       view.innerHTML = `
         <div class="shop__checkout">
           <h2 class="shop__step-title">📦 פרטי משלוח</h2>
@@ -974,13 +994,14 @@ function renderShop() {
         </div>`
       document.getElementById('checkout-form').onsubmit = (e) => {
         e.preventDefault()
-        track('shop_payment_step', { product: 'kolorabi', quantity: qty })
+        track('add_shipping_info', { product: 'kolorabi', quantity: qty, total: (qty * 4.9 + 15).toFixed(2), currency: 'ILS' })
         shopState = 'payment'; renderView()
       }
-      document.getElementById('back-cart').onclick = () => { shopState = 'cart'; renderView() }
+      document.getElementById('back-cart').onclick = () => { track('shop_back_navigation', { from: 'checkout', to: 'cart' }); shopState = 'cart'; renderView() }
     }
 
     else if (shopState === 'payment') {
+      track('checkout_payment_step', { product: 'kolorabi', quantity: qty, total: (qty * 4.9 + 15).toFixed(2), currency: 'ILS' })
       view.innerHTML = `
         <div class="shop__checkout">
           <h2 class="shop__step-title">💳 פרטי תשלום</h2>
@@ -1012,17 +1033,19 @@ function renderShop() {
         </div>`
       document.getElementById('payment-form').onsubmit = (e) => {
         e.preventDefault()
-        track('shop_payment_attempt', { product: 'kolorabi', quantity: qty, total: (qty * 4.9 + 15).toFixed(2) })
+        track('add_payment_info', { product: 'kolorabi', quantity: qty, total: (qty * 4.9 + 15).toFixed(2), currency: 'ILS' })
+        track('purchase_attempt', { product: 'kolorabi', quantity: qty, total: (qty * 4.9 + 15).toFixed(2), currency: 'ILS' })
         // "Processing" then OOS
         const btn = view.querySelector('.shop__pay-btn')
         btn.textContent = '⏳ מעבד תשלום...'
         btn.disabled = true
         setTimeout(() => { shopState = 'oos'; renderView() }, 2000)
       }
-      document.getElementById('back-checkout').onclick = () => { shopState = 'checkout'; renderView() }
+      document.getElementById('back-checkout').onclick = () => { track('shop_back_navigation', { from: 'payment', to: 'checkout' }); shopState = 'checkout'; renderView() }
     }
 
     else if (shopState === 'oos') {
+      track('purchase_failed_oos', { product: 'kolorabi', quantity: qty, total: (qty * 4.9 + 15).toFixed(2), currency: 'ILS', reason: 'out_of_stock' })
       view.innerHTML = `
         <div class="shop__oos">
           <img src="media/crying.png" alt="קולורבי בוכה" class="shop__oos-emoji" />
