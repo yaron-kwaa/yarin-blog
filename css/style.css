@@ -316,6 +316,14 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .cat--travel   { background: #FFE8DC; color: var(--primary); }
 .cat--food     { background: #FFE0F0; color: var(--secondary); }
 .cat--business { background: #EDE9FE; color: var(--purple); }
+.cat--culture  { background: #D1FAE5; color: #059669; }
+
+.post-card--culture:hover { border-color: #059669; }
+.post-card--culture .post-card__title:hover { color: #059669; }
+.post-card--culture .post-card__btn { background: #D1FAE5; color: #059669; }
+.post-card--culture .post-card__btn:hover { background: #059669; color: #fff; }
+.related-card--culture:hover { border-color: #059669; }
+.post-header--culture { background: linear-gradient(135deg, #ecfdf5, #f0fdf4); }
 
 .post-card__title {
   font-size: 1.125rem; font-weight: 900; line-height: 1.3;

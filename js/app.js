@@ -170,8 +170,8 @@ function renderHome() {
     ? POSTS
     : POSTS.filter(p => p.category === currentFilter)
 
-  const filters = ['הכל', 'מסעות', 'אוכל', 'רעיונות עסקיים']
-  const filterEmojis = { 'הכל': '🌟', 'מסעות': '✈️', 'אוכל': '🧆', 'רעיונות עסקיים': '💡' }
+  const filters = ['הכל', 'מסעות', 'אוכל', 'רעיונות עסקיים', 'תרבות']
+  const filterEmojis = { 'הכל': '🌟', 'מסעות': '✈️', 'אוכל': '🧆', 'רעיונות עסקיים': '💡', 'תרבות': '🎭' }
 
   const filterHTML = filters.map(f =>
     `<button class="filter-btn ${currentFilter === f ? 'active' : ''}" onclick="setFilter('${f}')" aria-pressed="${currentFilter === f}">
