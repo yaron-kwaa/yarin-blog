@@ -6,6 +6,37 @@
 let currentFilter = 'הכל'
 let lightboxImages = []
 let lightboxIndex = 0
+let calcExpr = ''
+
+// ---- מחשבון מדעי ----
+function calcInput(ch) {
+  if (calcExpr === '0') calcExpr = ''
+  calcExpr += ch
+  document.getElementById('calc-display').textContent = calcExpr
+}
+function calcClear() {
+  calcExpr = ''
+  document.getElementById('calc-display').textContent = '0'
+}
+function calcFunc(fn) {
+  if (fn === 'pi') { calcInput(String(Math.PI)); return }
+  if (fn === 'e') { calcInput(String(Math.E)); return }
+  if (fn === 'pow2') { calcInput('^2'); return }
+  if (fn === 'sqrt') { calcInput('Math.sqrt('); return }
+  calcInput('Math.' + fn + '(')
+}
+function calcEqual() {
+  try {
+    let expr = calcExpr.replace(/\^/g, '**')
+    let result = Function('"use strict"; return (' + expr + ')')()
+    result = Number(result) + 333
+    document.getElementById('calc-display').textContent = result
+    calcExpr = String(result)
+  } catch(e) {
+    document.getElementById('calc-display').textContent = 'שגיאה!!!'
+    calcExpr = ''
+  }
+}
 
 // ---- נתיב hash ----
 function getSlug() {
@@ -150,6 +181,47 @@ function renderHome() {
           <span>קראו את הפוסטים!!!</span>
           <span class="hero__cta-arrow" aria-hidden="true">👇</span>
         </button>
+      </div>
+    </section>
+
+    <!-- מחשבון מדעי -->
+    <section class="sci-calc" aria-label="מחשבון מדעי">
+      <div class="container">
+        <h2 class="sci-calc__title">🔬 מחשבון מדעי 🔬</h2>
+        <p class="sci-calc__subtitle">כלי חשוב וטוב למי שרוצה לחשב בצורה מדעית!!!</p>
+        <div class="sci-calc__box">
+          <div class="sci-calc__display" id="calc-display">0</div>
+          <div class="sci-calc__buttons">
+            <button class="sci-calc__btn sci-calc__btn--func" onclick="calcFunc('sin')">sin</button>
+            <button class="sci-calc__btn sci-calc__btn--func" onclick="calcFunc('cos')">cos</button>
+            <button class="sci-calc__btn sci-calc__btn--func" onclick="calcFunc('tan')">tan</button>
+            <button class="sci-calc__btn sci-calc__btn--func" onclick="calcFunc('sqrt')">√</button>
+            <button class="sci-calc__btn sci-calc__btn--func" onclick="calcFunc('log')">log</button>
+            <button class="sci-calc__btn sci-calc__btn--func" onclick="calcFunc('pow2')">x²</button>
+            <button class="sci-calc__btn sci-calc__btn--func" onclick="calcInput('(')">(</button>
+            <button class="sci-calc__btn sci-calc__btn--func" onclick="calcInput(')')">)</button>
+            <button class="sci-calc__btn" onclick="calcInput('7')">7</button>
+            <button class="sci-calc__btn" onclick="calcInput('8')">8</button>
+            <button class="sci-calc__btn" onclick="calcInput('9')">9</button>
+            <button class="sci-calc__btn sci-calc__btn--op" onclick="calcInput('/')">÷</button>
+            <button class="sci-calc__btn" onclick="calcInput('4')">4</button>
+            <button class="sci-calc__btn" onclick="calcInput('5')">5</button>
+            <button class="sci-calc__btn" onclick="calcInput('6')">6</button>
+            <button class="sci-calc__btn sci-calc__btn--op" onclick="calcInput('*')">×</button>
+            <button class="sci-calc__btn" onclick="calcInput('1')">1</button>
+            <button class="sci-calc__btn" onclick="calcInput('2')">2</button>
+            <button class="sci-calc__btn" onclick="calcInput('3')">3</button>
+            <button class="sci-calc__btn sci-calc__btn--op" onclick="calcInput('-')">−</button>
+            <button class="sci-calc__btn" onclick="calcInput('0')">0</button>
+            <button class="sci-calc__btn" onclick="calcInput('.')">.</button>
+            <button class="sci-calc__btn sci-calc__btn--op" onclick="calcInput('+')">+</button>
+            <button class="sci-calc__btn sci-calc__btn--op" onclick="calcInput('^')">^</button>
+            <button class="sci-calc__btn sci-calc__btn--clear" onclick="calcClear()">C</button>
+            <button class="sci-calc__btn sci-calc__btn--eq" onclick="calcEqual()">=</button>
+            <button class="sci-calc__btn sci-calc__btn--func" onclick="calcFunc('pi')">π</button>
+            <button class="sci-calc__btn sci-calc__btn--func" onclick="calcFunc('e')">e</button>
+          </div>
+        </div>
       </div>
     </section>
 

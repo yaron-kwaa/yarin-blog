@@ -575,7 +575,59 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   .post-header__teaser { font-size: 1rem; }
   .post-content__para { font-size: 1rem; padding: 14px 16px; }
   .gallery__grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+  .sci-calc__buttons { grid-template-columns: repeat(4, 1fr); }
 }
+
+/* ---- מחשבון מדעי ---- */
+.sci-calc {
+  padding: 48px 0; text-align: center;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+}
+.sci-calc__title {
+  font-size: 2rem; font-weight: 900; color: #00d4aa; margin-bottom: 8px;
+}
+.sci-calc__subtitle {
+  font-size: 1rem; color: rgba(255,255,255,.7); margin-bottom: 24px;
+}
+.sci-calc__box {
+  max-width: 420px; margin: 0 auto;
+  background: #0a0a1a; border-radius: var(--r-lg); padding: 20px;
+  box-shadow: 0 8px 32px rgba(0,212,170,.2), inset 0 1px 0 rgba(255,255,255,.05);
+}
+.sci-calc__display {
+  background: #0d1117; color: #00ff88; font-size: 1.75rem; font-weight: 700;
+  font-family: 'Courier New', monospace; text-align: left; direction: ltr;
+  padding: 16px 20px; border-radius: var(--r-md); margin-bottom: 16px;
+  min-height: 60px; display: flex; align-items: center;
+  border: 1px solid rgba(0,212,170,.3); word-break: break-all;
+  overflow-x: auto;
+}
+.sci-calc__buttons {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;
+}
+.sci-calc__btn {
+  padding: 14px 8px; font-size: 1.1rem; font-weight: 700;
+  border-radius: var(--r-sm); border: 1px solid rgba(255,255,255,.1);
+  background: #1a1a2e; color: #fff; cursor: pointer;
+  transition: var(--trans);
+}
+.sci-calc__btn:hover { background: #2a2a4e; transform: scale(1.05); }
+.sci-calc__btn--op {
+  background: #e91e8c; color: #fff;
+}
+.sci-calc__btn--op:hover { background: #ff3da5; }
+.sci-calc__btn--func {
+  background: #16213e; color: #00d4aa; font-size: .9rem;
+}
+.sci-calc__btn--func:hover { background: #1a3a5c; }
+.sci-calc__btn--clear {
+  background: #ff4444; color: #fff;
+}
+.sci-calc__btn--clear:hover { background: #ff6666; }
+.sci-calc__btn--eq {
+  background: linear-gradient(135deg, #00d4aa, #00bcd4); color: #0a0a1a; font-size: 1.3rem;
+}
+.sci-calc__btn--eq:hover { background: linear-gradient(135deg, #00ffcc, #00ddf0); }
 
 /* Small mobile */
 @media (max-width: 480px) {
