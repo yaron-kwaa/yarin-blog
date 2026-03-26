@@ -1158,7 +1158,7 @@ function openAdminPanel() {
       <div class="container">
         <div class="admin__header">
           <h1 class="admin__title">🔒 פאנל אדמין</h1>
-          <button class="admin__close" onclick="navigate(null)">✕ סגור</button>
+          <button class="admin__close" onclick="window.location.hash='#/';renderHome()">✕ סגור</button>
         </div>
 
         <div class="admin__stats">
