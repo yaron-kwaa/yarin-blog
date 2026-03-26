@@ -166,96 +166,80 @@ function _getQuotes(post) {
   return parts.length > 0 ? parts : [post.title]
 }
 
+// Combinatorial comment generator — every comment is unique
 function _genText(post, rng) {
   const quotes = _getQuotes(post)
-  const q = quotes[Math.floor(rng() * quotes.length)]
-  const sq = q.length > 45 ? q.slice(0, 45) + '...' : q
+  const q1 = quotes[Math.floor(rng() * quotes.length)]
+  const q2 = quotes[Math.floor(rng() * quotes.length)]
+  const sq = q1.length > 45 ? q1.slice(0, 45) + '...' : q1
+  const sq2 = q2.length > 40 ? q2.slice(0, 40) + '...' : q2
   const au = post.author || 'ירין'
-  const t = [
-    'וואו, אחלה כתבה!!! שיתפתי עם כל המשפחה',
-    'מדהים פשוט, כל מילה נכונה',
-    'קראתי פעמיים כבר, פשוט מצוין!!!',
-    'תותחים!!! עוד עוד עוד כתבות כאלה',
-    'אין עליכם, הכתבה הזאת שווה זהב',
-    'הכתבה הכי טובה שקראתי החודש, רצינית',
-    'סוף סוף מישהו כותב על זה!!! תודה!!!',
-    'בדיוק מה שהייתי צריך לקרוא היום',
-    'שלחתי לאמא שלי, גם היא אהבה מאוד',
-    'פשוט וואו. אין מילים אחרות',
-    au + ', אתה פשוט גאון. נקודה.',
-    'נהניתי מכל רגע של הקריאה הזאת',
-    'עוד כתבה כזאת בבקשה!!! מתחנן!!!',
-    'הבלוג הזה הכי טוב שיש באינטרנט',
-    'חייבים לשתף את זה בכל מקום!!!',
-    'אחד הדברים הכי טובים שקראתי בזמן האחרון, ואני קורא הרבה',
-    'הקטע על "' + sq + '" ממש דיבר אליי, לא רגיל',
-    '"' + sq + '" — כל כך נכון!!! מישהו סוף סוף אומר את זה',
-    'מי עוד שם לב ל"' + sq + '"? גאוני פשוט',
-    'הצחקתם אותי עם "' + sq + '", לא יכולתי להפסיק',
-    '"' + sq + '" — ממש ככה זה, בלי להוסיף מילה',
-    'לא מפסיק לחשוב על "' + sq + '", משגע',
-    'הקטע הכי טוב בכתבה: "' + sq + '"',
-    'אני הייתי שם! ממש ככה זה בדיוק',
-    'חבר שלי סיפר לי בדיוק את אותו דבר, מטורף',
-    'קרה לי משהו דומה, אני מזדהה לגמרי עם כל מילה',
-    'יש לי סיפור עוד יותר מטורף על הנושא הזה',
-    'אני גר ליד שם ואני יכול לאשר — הכל נכון!!!',
-    'קראתי את זה ונזכרתי בסבתא שלי, ממש מרגש',
-    'זה מזכיר לי את החופשה שלי בקיץ שעבר',
-    'מכיר את התחושה הזאת בדיוק, כאילו כתבת עליי',
-    'לא בטוח שזה מדויק לגמרי... אבל כתוב טוב',
-    'יש לי דעה אחרת לגמרי על הנושא',
-    'מממ, לא קונה את זה סליחה. לא משכנע',
-    'סליחה אבל "' + sq + '"? זה לא ככה בכלל לדעתי',
-    'לא מסכים עם הכל, אבל כתוב יפה צריך להודות',
-    'קראתי ואני חולק, אבל בסדר, דעות',
-    'אני חושב שיש פה הגזמה קלה, אבל אוקיי',
-    'מכבד את הדעה אבל ממש לא מסכים עם הכל',
-    'מתי הכתבה הבאה??? כבר מחכה בקוצר רוח!!!',
-    'אפשר לקבל עוד פרטים על "' + sq + '"?',
-    'איפה בדיוק? רוצה ללכת לבדוק בעצמי',
-    'מישהו יודע אם זה עדיין רלוונטי?',
-    au + ', אתה יכול לפרט עוד קצת? מעניין',
-    'יש עוד מקומות כאלה שאתם ממליצים עליהם?',
-    'מה זה הכתבה הזאת??? בושה!!!',
-    'שטויות ברמה הכי גבוהה, מצטער שאני אומר',
-    'זה מביך קצת, מה קורה פה',
-    'אי אפשר לפרסם דברים כאלה!!! יש גבול',
-    'הגעתי לפה דרך גוגל ולא מתחרט שנייה',
-    'למה אני קורא את זה בשלוש בלילה? כי אי אפשר להפסיק',
-    'הבלוג הזה ממכר, אני פה כבר שעה ולא זז',
-    'אני בעבודה ובמקום לעבוד אני קורא את הבלוג הזה',
-    'מישהו פה גם אוהב חומוס? או רק אני?',
-    'שבת שלום לכולם!!! קריאה נעימה',
-    'באתי בשביל כתבה אחרת ונשארתי פה, אין מה לעשות',
-    'הבלוג הזה שינה לי את האופן שבו אני רואה את העולם, רצינית',
-    'אמא שלי הכריחה אותי לקרוא ובאמת שווה, תודה אמא',
-    'אני לא יודע מה אני עושה פה אבל אני נשאר',
-    'מישהו שם לב שהמחשבון המדעי באתר לא עובד כמו שצריך? חח',
-    'תראו גם את לוח הכפל שיש פה, גאוני!!!',
-    'מי האלברטו מוסקטו הזה? גאון או משוגע? אולי שניהם',
-    'כתבה טובה, אבל חסר פה קצת עומק',
-    'אני בא לפה כל יום לבדוק אם יש כתבה חדשה',
-    'שיתפתי בקבוצת הווטסאפ ומחכה לתגובות',
+  const title = post.title
+
+  // Building blocks — openers, middles, closers
+  const openers = [
+    'וואו,','אחלה,','מדהים,','רגע,','אוקיי אז','שמעו,','חברים,',
+    'אני חייב להגיד ש','לא יאמן,','בואו נדבר על זה —','תשמעו,',
+    'קראתי את "'+title+'" ו','אחרי שקראתי את הכל,','בהתחלה חשבתי ש',
+    'הגעתי לפה במקרה ו','מישהו שלח לי את הקישור ו','נתקלתי בכתבה הזאת ו',
+    'אז ככה,','פשוט,','בקיצור,','אני ממש','לא מאמין ש','אם אני כנה,',
+    'הפעם חייבים להודות ש','כל פעם שאני קורא פה',''+au+',',
   ]
-  return t[Math.floor(rng() * t.length)]
+  const middles = [
+    'הכתבה הזאת פשוט מדהימה','הקטע על "'+sq+'" ממש דיבר אליי',
+    'כל מילה פה נכונה','זה בדיוק מה שחשבתי','אני לא מסכים עם הכל',
+    '"'+sq+'" — זה כל כך מדויק','אני מזדהה עם כל שורה',
+    'יש פה הגזמה קלה אבל בסדר','הצחקתם אותי עם "'+sq2+'"',
+    'זה מזכיר לי משהו שקרה לי','אני ממש לא בטוח לגבי "'+sq+'"',
+    'הייתי שם בעצמי ואני מאשר','חבר שלי סיפר בדיוק את זה',
+    'אף אחד לא כותב ככה היום','זה קורע אותי מצחוק',
+    'אני חולק לגמרי על "'+sq2+'"','המון אמת בכתבה הזאת',
+    'זה גורם לי לחשוב מחדש','קראתי את זה פעמיים','יש פה תובנות רציניות',
+    'שיתפתי את זה עם כולם','אני לא מפסיק לדבר על "'+sq+'"',
+    'הנושא הזה ממש חשוב',''+au+' פשוט יודע לכתוב','באמת נגע בי',
+    'זה הדבר הכי אמיתי שקראתי היום','פשוט בול','אני חושב שחסר פה משהו',
+    'הכתבה חזקה אבל "'+sq2+'" זה קצת מוגזם',''+au+' עשה עבודה מעולה',
+  ]
+  const closers = [
+    '!!!','— ממליץ לכולם','תשתפו את זה','אני אחזור לקרוא שוב',
+    'מחכה לכתבה הבאה!!!','שלחו עוד ככה','כל הכבוד '+au,
+    'הלוואי שהיו עוד בלוגים כאלה','חח','פשוט תקראו',
+    'עשיתם לי את היום','מישהו עוד מרגיש ככה?','❤️',
+    'אבל באמת, תחשבו על זה','סוף דבר — שווה','10/10',
+    'אני פשוט...','מקווה שימשיכו לכתוב','(מדבר מניסיון)',
+    'תנסו בעצמכם','אין ספק','פשוט כן','— '+au+' תמשיך!!!',
+    'יאללה עוד כתבה','#הבלוגשלירין','ואני אומר את זה בתור מישהו שקורא הרבה',
+    ', ואני לא אומר את זה סתם','ומי שלא מסכים מוזמן להגיב',
+  ]
+  const emojis = ['😂','🔥','❤️','👏','💯','🤔','😍','🙌','👀','✨','💪','🎯','😱','🤣','👍']
+
+  const opener = openers[Math.floor(rng() * openers.length)]
+  const middle = middles[Math.floor(rng() * middles.length)]
+  const closer = closers[Math.floor(rng() * closers.length)]
+  const emoji = rng() < 0.4 ? ' ' + emojis[Math.floor(rng() * emojis.length)] : ''
+
+  // Different structures for variety
+  const structure = Math.floor(rng() * 6)
+  if (structure === 0) return opener + ' ' + middle + ' ' + closer + emoji
+  if (structure === 1) return middle + '. ' + closer + emoji
+  if (structure === 2) return opener + ' ' + middle + emoji
+  if (structure === 3) return '"' + sq + '" — ' + middle + '. ' + closer + emoji
+  if (structure === 4) return opener + ' ' + middle + '. ' + middle.split(' ').slice(0,4).join(' ') + '...' + emoji
+  return middle + emoji
 }
 
+// Combinatorial reply generator
 function _genReply(rng) {
-  const r = [
-    'מסכים איתך לגמרי!!!','בדיוק מה שחשבתי','לא נכון, תבדוק שוב',
-    'אחלה תגובה, בול','ממש לא, סליחה','100% צודק','תודה!!!','בול בפוני',
-    'אתה צודק לגמרי','לא מסכים בכלל אבל מכבד','וואו, נכון!!!',
-    'מעולה, לא חשבתי על זה','חח ממש','דווקא יש בזה משהו',
-    'אין על הבלוג הזה, צודק','גם אני חשבתי ככה בדיוק',
-    'ממש לא מסכים סליחה, יש לי דעה אחרת','כל הכבוד על התגובה',
-    'ממש!!!','יפה נאמר מאוד','חח אחלה, הצחקת אותי','נכון מאוד, בול',
-    'זה בדיוק מה שהייתי כותב, תודה','וואלה אתה צודק, מה לעשות',
-    'לא ולא, אבל בסדר','אתה מוזמן לכתוב כתבה בעצמך','בדיוק!!!',
-    'חבל שלא חשבתי על זה קודם','מסכים, וגם הייתי מוסיף ש...',
-    'תגובה מצוינת, כל הכבוד','לא רלוונטי בכלל','שטויות',
+  const intros = ['','הממ, ','נכון, ','לא, ','כן! ','בול, ','חח, ','וואלה ','אכן, ','סבבה, ','רגע, ']
+  const cores = [
+    'מסכים לגמרי','בדיוק מה שחשבתי','לא נכון','אחלה תגובה','ממש לא',
+    'צודק','תודה','אתה צודק','לא מסכים','נכון מאוד','יפה נאמר',
+    'הצחקת אותי','דווקא יש בזה משהו','גם חשבתי ככה','כל הכבוד',
+    'חבל שלא חשבתי על זה','תגובה מצוינת','לא רלוונטי','שטויות',
+    'מעניין','100%','בדיוק','אתה מוזמן לכתוב בעצמך','יש לי דעה אחרת',
   ]
-  return r[Math.floor(rng() * r.length)]
+  const endings = ['','!!!','...','👍','😂',' לגמרי',' אבל בסדר',' חח',' 🔥',' בול']
+  return intros[Math.floor(rng()*intros.length)] + cores[Math.floor(rng()*cores.length)] + endings[Math.floor(rng()*endings.length)]
 }
 
 function _autoPopulate() {
@@ -382,7 +366,10 @@ function getSlug() {
 }
 
 function navigate(slug) {
-  if (slug) {
+  if (slug && slug.startsWith('shop/')) {
+    track('shop_navigate', { shop_page: slug })
+    window.location.hash = '#/' + slug
+  } else if (slug) {
     track('post_click', { post_slug: slug, post_title: (POSTS.find(p=>p.slug===slug)||{}).title })
     window.location.hash = '#/post/' + slug
   } else {
@@ -523,13 +510,6 @@ function renderHome() {
       </div>
     </section>
 
-    <!-- באנר וידאו רחב (1920x600) -->
-    <section class="video-banner video-banner--hero" onclick="track('video_banner_click',{banner:'kolorabi-hero'})">
-      <video class="video-banner__video" autoplay muted loop playsinline>
-        <source src="media/kolorabi-hero.mp4" type="video/mp4" />
-      </video>
-    </section>
-
     <!-- כפתורי כלים -->
     <div class="sci-calc-toggle-wrap">
       <button class="sci-calc-toggle" onclick="toggleCalc()" aria-label="פתח מחשבון מדעי">🔬</button>
@@ -604,7 +584,7 @@ function renderHome() {
         </div>
         <div class="posts-layout">
           <div class="posts-grid" aria-live="polite">${gridHTML}</div>
-          <aside class="video-banner video-banner--square" onclick="track('video_banner_click',{banner:'kolorabi-square'})">
+          <aside class="video-banner video-banner--square" onclick="track('video_banner_click',{banner:'kolorabi-square'});navigate('shop/kolorabi')">
             <video class="video-banner__video" autoplay muted loop playsinline>
               <source src="media/kolorabi-square.mp4" type="video/mp4" />
             </video>
@@ -614,7 +594,7 @@ function renderHome() {
     </main>
 
     <!-- באנר וידאו סטריפ (1920x300) -->
-    <section class="video-banner video-banner--strip" onclick="track('video_banner_click',{banner:'kolorabi-strip'})">
+    <section class="video-banner video-banner--strip" onclick="track('video_banner_click',{banner:'kolorabi-strip'});navigate('shop/kolorabi')">
       <video class="video-banner__video" autoplay muted loop playsinline>
         <source src="media/kolorabi-strip.mp4" type="video/mp4" />
       </video>
@@ -879,11 +859,219 @@ function updateLightbox() {
 }
 
 // ============================================================
+// עמוד חנות קולורבי
+// ============================================================
+
+function renderShop() {
+  document.title = 'חנות קולורבי — הבלוג של ירין'
+  document.getElementById('nav-home').classList.remove('active')
+
+  let shopState = 'browse' // browse | cart | checkout | payment | oos
+  let qty = 1
+
+  const html = `
+    <section class="shop" aria-label="חנות קולורבי">
+      <div class="container">
+        <button class="shop__back" onclick="navigate(null)">→ חזרה לבלוג</button>
+        <div id="shop-view"></div>
+      </div>
+    </section>`
+
+  document.getElementById('main-content').innerHTML = html
+  window.scrollTo(0, 0)
+
+  function renderView() {
+    const view = document.getElementById('shop-view')
+    if (!view) return
+
+    if (shopState === 'browse') {
+      view.innerHTML = `
+        <div class="shop__product">
+          <div class="shop__img-wrap">
+            <img src="media/kolorabi-product.jpg" alt="קולורבי טרי ואיכותי" class="shop__img" />
+          </div>
+          <div class="shop__details">
+            <span class="shop__badge">🥬 מוצר חם!!!</span>
+            <h1 class="shop__title">קולורבי טרי מהשדה</h1>
+            <p class="shop__desc">קולורבי אורגני, טרי, ישר מהשדה לצלחת שלכם!!! הקולורבי הכי טוב שתמצאו בכל הארץ. מושלם לסלט, לבישול, או סתם לנשנוש בריא!!!</p>
+            <div class="shop__price">₪4.90 <small>ליחידה</small></div>
+            <div class="shop__qty-row">
+              <label class="shop__qty-label">כמות:</label>
+              <button class="shop__qty-btn" id="qty-minus">−</button>
+              <span class="shop__qty-val" id="qty-display">${qty}</span>
+              <button class="shop__qty-btn" id="qty-plus">+</button>
+            </div>
+            <div class="shop__total">סה״כ: <strong>₪${(qty * 4.9).toFixed(2)}</strong></div>
+            <button class="shop__add-btn" id="add-to-cart">🛒 הוסף לסל</button>
+          </div>
+        </div>`
+      document.getElementById('qty-minus').onclick = () => { if (qty > 1) { qty--; renderView() } }
+      document.getElementById('qty-plus').onclick = () => { if (qty < 99) { qty++; renderView() } }
+      document.getElementById('add-to-cart').onclick = () => {
+        track('shop_add_to_cart', { product: 'kolorabi', quantity: qty })
+        shopState = 'cart'; renderView()
+      }
+    }
+
+    else if (shopState === 'cart') {
+      view.innerHTML = `
+        <div class="shop__cart">
+          <h2 class="shop__step-title">🛒 הסל שלך</h2>
+          <div class="shop__cart-item">
+            <img src="media/kolorabi-product.jpg" alt="קולורבי" class="shop__cart-img" />
+            <div class="shop__cart-info">
+              <strong>קולורבי טרי מהשדה</strong>
+              <p>כמות: ${qty} | ₪${(qty * 4.9).toFixed(2)}</p>
+            </div>
+          </div>
+          <div class="shop__cart-summary">
+            <div class="shop__cart-line"><span>סכום ביניים</span><span>₪${(qty * 4.9).toFixed(2)}</span></div>
+            <div class="shop__cart-line"><span>משלוח</span><span>₪15.00</span></div>
+            <div class="shop__cart-line shop__cart-total"><span>סה״כ</span><span>₪${(qty * 4.9 + 15).toFixed(2)}</span></div>
+          </div>
+          <button class="shop__add-btn" id="go-checkout">💳 המשך לתשלום</button>
+          <button class="shop__link-btn" id="back-browse">← חזרה למוצר</button>
+        </div>`
+      document.getElementById('go-checkout').onclick = () => {
+        track('shop_begin_checkout', { product: 'kolorabi', quantity: qty, total: (qty * 4.9 + 15).toFixed(2) })
+        shopState = 'checkout'; renderView()
+      }
+      document.getElementById('back-browse').onclick = () => { shopState = 'browse'; renderView() }
+    }
+
+    else if (shopState === 'checkout') {
+      view.innerHTML = `
+        <div class="shop__checkout">
+          <h2 class="shop__step-title">📦 פרטי משלוח</h2>
+          <form class="shop__form" id="checkout-form">
+            <div class="shop__field">
+              <label>שם מלא</label>
+              <input type="text" placeholder="ירין הגדול" required />
+            </div>
+            <div class="shop__field">
+              <label>טלפון</label>
+              <input type="tel" placeholder="050-1234567" required />
+            </div>
+            <div class="shop__field">
+              <label>כתובת למשלוח</label>
+              <input type="text" placeholder="רחוב הקולורבי 7, תל אביב" required />
+            </div>
+            <div class="shop__field">
+              <label>עיר</label>
+              <input type="text" placeholder="תל אביב" required />
+            </div>
+            <div class="shop__field">
+              <label>מיקוד</label>
+              <input type="text" placeholder="6100000" />
+            </div>
+            <div class="shop__cart-summary">
+              <div class="shop__cart-line shop__cart-total"><span>סה״כ לתשלום</span><span>₪${(qty * 4.9 + 15).toFixed(2)}</span></div>
+            </div>
+            <button type="submit" class="shop__add-btn">💳 המשך לתשלום</button>
+            <button type="button" class="shop__link-btn" id="back-cart">← חזרה לסל</button>
+          </form>
+        </div>`
+      document.getElementById('checkout-form').onsubmit = (e) => {
+        e.preventDefault()
+        track('shop_payment_step', { product: 'kolorabi', quantity: qty })
+        shopState = 'payment'; renderView()
+      }
+      document.getElementById('back-cart').onclick = () => { shopState = 'cart'; renderView() }
+    }
+
+    else if (shopState === 'payment') {
+      view.innerHTML = `
+        <div class="shop__checkout">
+          <h2 class="shop__step-title">💳 פרטי תשלום</h2>
+          <form class="shop__form" id="payment-form">
+            <div class="shop__field">
+              <label>מספר כרטיס אשראי</label>
+              <input type="text" placeholder="1234 5678 9012 3456" maxlength="19" required />
+            </div>
+            <div class="shop__field-row">
+              <div class="shop__field">
+                <label>תוקף</label>
+                <input type="text" placeholder="MM/YY" maxlength="5" required />
+              </div>
+              <div class="shop__field">
+                <label>CVV</label>
+                <input type="text" placeholder="123" maxlength="4" required />
+              </div>
+            </div>
+            <div class="shop__field">
+              <label>שם בעל הכרטיס</label>
+              <input type="text" placeholder="ירין קרנבל" required />
+            </div>
+            <div class="shop__cart-summary">
+              <div class="shop__cart-line shop__cart-total"><span>סה״כ לחיוב</span><span>₪${(qty * 4.9 + 15).toFixed(2)}</span></div>
+            </div>
+            <button type="submit" class="shop__add-btn shop__pay-btn">🔒 שלם ₪${(qty * 4.9 + 15).toFixed(2)}</button>
+            <button type="button" class="shop__link-btn" id="back-checkout">← חזרה לפרטי משלוח</button>
+          </form>
+        </div>`
+      document.getElementById('payment-form').onsubmit = (e) => {
+        e.preventDefault()
+        track('shop_payment_attempt', { product: 'kolorabi', quantity: qty, total: (qty * 4.9 + 15).toFixed(2) })
+        // "Processing" then OOS
+        const btn = view.querySelector('.shop__pay-btn')
+        btn.textContent = '⏳ מעבד תשלום...'
+        btn.disabled = true
+        setTimeout(() => { shopState = 'oos'; renderView() }, 2000)
+      }
+      document.getElementById('back-checkout').onclick = () => { shopState = 'checkout'; renderView() }
+    }
+
+    else if (shopState === 'oos') {
+      view.innerHTML = `
+        <div class="shop__oos">
+          <span class="shop__oos-emoji">😭</span>
+          <h2 class="shop__oos-title">אוי לא!!! המלאי אזל!!!</h2>
+          <p class="shop__oos-text">מצטערים מאוד!!! הקולורבי הטרי שלנו אזל מהמלאי. כנראה שיותר מדי אנשים גילו כמה הוא טעים!!!</p>
+          <p class="shop__oos-text">השאירו מייל ונעדכן אתכם ברגע שיגיעו קולורבי חדשים מהשדה! 🌱</p>
+          <form class="shop__email-form" id="oos-email-form">
+            <div class="shop__email-row">
+              <input type="email" class="shop__email-input" placeholder="your@email.com" required />
+              <button type="submit" class="shop__email-btn">📩 עדכנו אותי!</button>
+            </div>
+          </form>
+          <div id="oos-success" class="shop__oos-success" style="display:none">
+            <span>✅</span>
+            <p>תודה רבה!!! נעדכן אתכם ברגע שהקולורבי חוזר למלאי!!!</p>
+          </div>
+          <button class="shop__link-btn" onclick="navigate(null)" style="margin-top:24px">← חזרה לבלוג</button>
+        </div>`
+      document.getElementById('oos-email-form').onsubmit = (e) => {
+        e.preventDefault()
+        const email = e.target.querySelector('input').value
+        track('shop_restock_signup', { email: email, product: 'kolorabi' })
+        e.target.style.display = 'none'
+        document.getElementById('oos-success').style.display = 'flex'
+      }
+    }
+  }
+
+  renderView()
+}
+
+// ============================================================
 // ראוטר
 // ============================================================
 
 function route() {
   _autoPopulate() // auto-generate comments silently
+  const hash = window.location.hash
+
+  // Shop pages
+  if (hash.startsWith('#/shop/')) {
+    track('page_view', {
+      page_title: 'חנות קולורבי',
+      page_location: window.location.href,
+      page_path: '/shop/kolorabi'
+    })
+    renderShop()
+    return
+  }
+
   const slug = getSlug()
   if (slug) {
     const post = POSTS.find(p => p.slug === slug)
