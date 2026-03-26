@@ -843,7 +843,7 @@ function buildMultTable() {
       const mix = colors[Math.floor((i + j - 2) / 2) % colors.length]
       const egg = easterEggs[val]
       if (egg) {
-        html += `<td class="mult-table__cell mult-table__cell--link" style="background:${mix}22; color:${mix}" onclick="window.open('${egg}','_blank')">${val}</td>`
+        html += `<td class="mult-table__cell mult-table__cell--link" style="background:${mix}22; color:${mix}" onclick="track('mult_table_easter_egg',{value:${val},calc:'${i}x${j}',url:'${egg}'});window.open('${egg}','_blank')">${val}</td>`
       } else {
         html += `<td class="mult-table__cell" style="background:${mix}22; color:${mix}">${val}</td>`
       }
