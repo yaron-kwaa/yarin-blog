@@ -552,6 +552,14 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .footer__tagline { font-size: .875rem; opacity: .7; max-width: 360px; }
 .footer__copy   { font-size: .875rem; opacity: .5; }
 .footer__hearts { font-size: 1.5rem; letter-spacing: 8px; opacity: .7; }
+.footer__dz {
+  display: inline-flex; align-items: center; gap: 10px;
+  margin-top: 16px; padding: 8px 20px; border-radius: var(--r-full);
+  background: rgba(255,255,255,.1); color: #fff; text-decoration: none;
+  font-size: .9rem; font-weight: 600; transition: var(--trans);
+}
+.footer__dz:hover { background: rgba(255,255,255,.2); }
+.footer__dz-logo { height: 24px; filter: brightness(0) invert(1); }
 
 /* ============================================================
    ריספונסיב
