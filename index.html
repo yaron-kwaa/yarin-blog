@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="הבלוג של ירין — פוסטים על מקומות, אוכל, ורעיונות עסקיים מדהימים!!!" />
+  <title>הבלוג של ירין</title>
+
+  <!-- גופן -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;700;900&display=swap" rel="stylesheet" />
+
+  <!-- עיצוב -->
+  <link rel="stylesheet" href="css/style.css" />
+
+  <!-- אייקון -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✍️</text></svg>" />
+</head>
+<body>
+
+  <!-- ============================================================
+       ניווט
+       ============================================================ -->
+  <nav class="nav" aria-label="ניווט ראשי">
+    <div class="nav__inner container">
+      <div class="nav__logo" id="nav-logo" role="button" tabindex="0" aria-label="חזרה לדף הבית">
+        <span class="nav__logo-emoji" aria-hidden="true">✍️</span>
+        <span class="nav__logo-text">הבלוג של ירין</span>
+      </div>
+      <div class="nav__links">
+        <button class="nav__link" id="nav-home" aria-label="דף הבית">🏠 ראשי</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       תוכן דינמי — ממולא ע"י app.js
+       ============================================================ -->
+  <div id="main-content" role="main"></div>
+
+  <!-- ============================================================
+       פוטר
+       ============================================================ -->
+  <footer class="footer" role="contentinfo">
+    <div class="footer__inner container">
+      <div class="footer__logo">
+        <span class="footer__emoji" aria-hidden="true">✍️</span>
+        <span class="footer__brand">הבלוג של ירין</span>
+      </div>
+      <p class="footer__tagline">כתוב עם אהבה, התלהבות, ויותר מדי סימני קריאה!!!</p>
+      <p class="footer__copy" id="footer-year"></p>
+      <div class="footer__hearts" aria-hidden="true">❤️ 🧆 ✈️ 💡 ☕ 🎉</div>
+    </div>
+  </footer>
+
+  <!-- ============================================================
+       לייטבוקס גלריה
+       ============================================================ -->
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-label="תמונה מוגדלת">
+    <button id="lightbox-close" class="lightbox__close" aria-label="סגור תמונה">✕</button>
+    <div id="lightbox-content" class="lightbox__content">
+      <img id="lightbox-img" src="" alt="" class="lightbox__img" />
+      <p id="lightbox-caption" class="lightbox__caption"></p>
+      <div class="lightbox__nav">
+        <button id="lightbox-prev" class="lightbox__btn" aria-label="תמונה קודמת">→</button>
+        <span id="lightbox-counter" class="lightbox__counter">1 / 1</span>
+        <button id="lightbox-next" class="lightbox__btn" aria-label="תמונה הבאה">←</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       סקריפטים
+       ============================================================ -->
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // שנה נוכחית בפוטר
+    document.getElementById('footer-year').textContent =
+      '© ' + new Date().getFullYear() + ' ירין. כל הזכויות שמורות. אבל אתם מוזמנים לשתף!!!'
+  </script>
+</body>
+</html>
