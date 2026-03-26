@@ -190,6 +190,11 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   animation: wiggle 2s infinite; vertical-align: middle; margin-right: 8px;
   -webkit-text-fill-color: initial;
 }
+.hero__title-sub {
+  display: block; font-size: .4em; font-weight: 500;
+  color: var(--muted); margin-top: 4px;
+  -webkit-text-fill-color: initial;
+}
 .hero__subtitle {
   font-size: 1.125rem; color: var(--muted);
   max-width: 640px; line-height: 1.8;

@@ -134,6 +134,7 @@ function renderHome() {
           <span class="hero__title-line">הבלוג</span>
           <span class="hero__title-accent"> של ירין </span>
           <span class="hero__title-emoji" aria-hidden="true">✨</span>
+          <span class="hero__title-sub">(וגם של אלברטו מוסקטו, אבל יותר של ירין)</span>
         </h1>
         <p class="hero__subtitle">
           ברוכים הבאים לבלוג המדהים, המהנה, המרגש, והכי כייפי שנוצר אי פעם בהיסטוריה של האנושות!!!<br/>
