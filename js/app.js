@@ -831,12 +831,22 @@ function buildMultTable() {
     html += `<th class="mult-table__head" style="background:${colors[j-1]}">${j}</th>`
   }
   html += '</tr></thead><tbody>'
+  const easterEggs = {
+    30: 'https://www.foodsdictionary.co.il/tag/recipes-with-kohlrabi',
+    10: 'https://www.youtube.com/watch?v=m30TiyJE28s',
+    1: 'https://youtu.be/RnurK4_jmoI?si=c2xgywGo_-2ZCny5&t=4'
+  }
   for (let i = 1; i <= 10; i++) {
     html += `<tr><th class="mult-table__row-head" style="background:${colors[i-1]}">${i}</th>`
     for (let j = 1; j <= 10; j++) {
       const val = i * j
       const mix = colors[Math.floor((i + j - 2) / 2) % colors.length]
-      html += `<td class="mult-table__cell" style="background:${mix}22; color:${mix}">${val}</td>`
+      const egg = easterEggs[val]
+      if (egg) {
+        html += `<td class="mult-table__cell mult-table__cell--link" style="background:${mix}22; color:${mix}" onclick="window.open('${egg}','_blank')">${val}</td>`
+      } else {
+        html += `<td class="mult-table__cell" style="background:${mix}22; color:${mix}">${val}</td>`
+      }
     }
     html += '</tr>'
   }

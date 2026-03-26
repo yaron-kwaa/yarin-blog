@@ -907,6 +907,12 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   box-shadow: 0 4px 16px rgba(0,0,0,.2);
   border-radius: 4px;
 }
+.mult-table__cell--link { cursor: pointer; }
+.mult-table__cell--link:hover {
+  transform: scale(1.4);
+  box-shadow: 0 4px 20px rgba(0,0,0,.3);
+  outline: 2px dashed currentColor; outline-offset: 2px;
+}
 .mult-table-toggle {
   background: linear-gradient(135deg, #EAB308, #F97316) !important;
   color: white; border-color: #EAB308 !important;
