@@ -1005,7 +1005,7 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   background: var(--white); border-radius: var(--r-lg); padding: 48px 32px;
   box-shadow: var(--shadow-md);
 }
-.shop__oos-emoji { font-size: 5rem; display: block; margin-bottom: 16px; animation: wiggle 1s infinite; }
+.shop__oos-emoji { width: 150px; height: auto; display: block; margin: 0 auto 16px; animation: wiggle 1s infinite; }
 .shop__oos-title { font-size: 1.8rem; font-weight: 900; margin-bottom: 16px; color: var(--primary); }
 .shop__oos-text { color: var(--muted); margin-bottom: 12px; line-height: 1.8; }
 .shop__email-form { margin-top: 24px; }

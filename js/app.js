@@ -888,7 +888,7 @@ function renderShop() {
       view.innerHTML = `
         <div class="shop__product">
           <div class="shop__img-wrap">
-            <img src="media/kolorabi-product.jpg" alt="קולורבי טרי ואיכותי" class="shop__img" />
+            <img src="media/kolorabi-product.png" alt="קולורבי טרי ואיכותי" class="shop__img" />
           </div>
           <div class="shop__details">
             <span class="shop__badge">🥬 מוצר חם!!!</span>
@@ -918,7 +918,7 @@ function renderShop() {
         <div class="shop__cart">
           <h2 class="shop__step-title">🛒 הסל שלך</h2>
           <div class="shop__cart-item">
-            <img src="media/kolorabi-product.jpg" alt="קולורבי" class="shop__cart-img" />
+            <img src="media/kolorabi-product.png" alt="קולורבי" class="shop__cart-img" />
             <div class="shop__cart-info">
               <strong>קולורבי טרי מהשדה</strong>
               <p>כמות: ${qty} | ₪${(qty * 4.9).toFixed(2)}</p>
@@ -1024,7 +1024,7 @@ function renderShop() {
     else if (shopState === 'oos') {
       view.innerHTML = `
         <div class="shop__oos">
-          <span class="shop__oos-emoji">😭</span>
+          <img src="media/crying.png" alt="קולורבי בוכה" class="shop__oos-emoji" />
           <h2 class="shop__oos-title">אוי לא!!! המלאי אזל!!!</h2>
           <p class="shop__oos-text">מצטערים מאוד!!! הקולורבי הטרי שלנו אזל מהמלאי. כנראה שיותר מדי אנשים גילו כמה הוא טעים!!!</p>
           <p class="shop__oos-text">השאירו מייל ונעדכן אתכם ברגע שיגיעו קולורבי חדשים מהשדה! 🌱</p>
