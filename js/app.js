@@ -74,6 +74,9 @@ function sortPosts(posts) {
     const yarin = arr.filter(p => !p.author || !p.author.includes('אלברטו'))
     return [...alberto, ...yarin]
   }
+  if (currentSort === 'comments') {
+    return arr.sort((a, b) => getComments(b.slug).length - getComments(a.slug).length)
+  }
   if (currentSort === 'algorithm') {
     // "smart algorithm" = random shuffle
     for (let i = arr.length - 1; i > 0; i--) {
@@ -395,12 +398,14 @@ function categoryLabel(post) {
 
 // ---- HTML כרטיס ----
 function renderCard(post, delay = 0) {
+  const commentCount = getComments(post.slug).length
   return `
     <div class="posts-grid__item" style="animation-delay:${delay}s">
       <article class="post-card post-card--${esc(post.colorClass)}" data-slug="${esc(post.slug)}">
         <div class="post-card__image-wrap" onclick="navigate('${esc(post.slug)}')" role="button" tabindex="0" aria-label="פתח פוסט: ${esc(post.title)}">
           <img src="${esc(post.mainImage.src)}" alt="${esc(post.mainImage.alt)}" class="post-card__image" loading="lazy" />
           <div class="post-card__image-overlay" aria-hidden="true"></div>
+          ${commentCount > 0 ? `<span class="post-card__comments-badge">💬 ${commentCount}</span>` : ''}
         </div>
         <div class="post-card__body">
           <div>${categoryLabel(post)}</div>
@@ -581,6 +586,7 @@ function renderHome() {
           <span class="sort-bar__label">🔀 מיון:</span>
           <button class="sort-btn ${currentSort === 'date' ? 'active' : ''}" onclick="setSort('date')">📅 סדר פרסום</button>
           <button class="sort-btn ${currentSort === 'popular' ? 'active' : ''}" onclick="setSort('popular')">🔥 פופולריות</button>
+          <button class="sort-btn ${currentSort === 'comments' ? 'active' : ''}" onclick="setSort('comments')">💬 מספר תגובות</button>
           <button class="sort-btn ${currentSort === 'algorithm' ? 'active' : ''}" onclick="setSort('algorithm')">🧠 אלגוריתם חכם</button>
         </div>
         <div class="posts-layout">
