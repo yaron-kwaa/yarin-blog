@@ -48,6 +48,7 @@ function renderCard(post, delay = 0) {
         <div class="post-card__body">
           <div>${categoryLabel(post)}</div>
           <h2 class="post-card__title" onclick="navigate('${esc(post.slug)}')" role="button" tabindex="0">${esc(post.title)}</h2>
+          ${post.author ? `<p class="post-card__author">✍️ ${esc(post.author)}</p>` : ''}
           <p class="post-card__teaser">${esc(post.teaser)}</p>
           <button class="post-card__btn btn--${esc(post.colorClass)}" onclick="navigate('${esc(post.slug)}')">
             <span>קרא עוד!!!</span>
@@ -140,7 +141,7 @@ function renderHome() {
           (או לפחות יצחיקו אתכם. שזה בעצם יותר חשוב.)
         </p>
         <div class="hero__stats" aria-label="עובדות על הבלוג">
-          <div class="hero__stat"><span class="hero__stat-number">9</span><span class="hero__stat-label">פוסטים מדהימים</span></div>
+          <div class="hero__stat"><span class="hero__stat-number">10</span><span class="hero__stat-label">פוסטים מדהימים</span></div>
           <div class="hero__stat"><span class="hero__stat-number">∞</span><span class="hero__stat-label">אהבה לחומוס</span></div>
           <div class="hero__stat"><span class="hero__stat-number">3</span><span class="hero__stat-label">רעיונות שישנו עולמות</span></div>
         </div>
@@ -211,6 +212,7 @@ function renderPost(slug) {
         </button>
         <div class="post-header__meta">
           <span class="post-header__category cat--${esc(post.colorClass)}">${esc(post.categoryEmoji)} ${esc(post.category)}</span>
+          ${post.author ? `<span class="post-header__author">✍️ מאת: ${esc(post.author)}</span>` : ''}
         </div>
         <h1 class="post-header__title">${esc(post.title)}</h1>
         <p class="post-header__teaser">${esc(post.teaser)}</p>

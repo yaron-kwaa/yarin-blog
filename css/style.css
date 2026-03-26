@@ -320,6 +320,10 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .post-card--food .post-card__title:hover     { color: var(--secondary); }
 .post-card--business .post-card__title:hover { color: var(--purple); }
 
+.post-card__author {
+  font-size: .8rem; color: var(--purple); font-weight: 600; font-style: italic;
+  margin-bottom: 4px;
+}
 .post-card__teaser {
   font-size: .875rem; color: var(--muted); line-height: 1.7; flex: 1;
   display: -webkit-box; -webkit-line-clamp: 3;
@@ -372,6 +376,10 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .post-header__category {
   display: inline-block; font-size: .875rem; font-weight: 700;
   padding: 4px 16px; border-radius: var(--r-full); margin-bottom: 16px;
+}
+.post-header__author {
+  display: inline-block; font-size: .95rem; font-weight: 600; font-style: italic;
+  color: rgba(255,255,255,.85); margin-right: 12px;
 }
 .post-header__title {
   font-size: clamp(1.75rem, 4vw, 3rem);
