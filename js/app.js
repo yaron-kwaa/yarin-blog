@@ -1068,6 +1068,10 @@ function renderShop() {
         e.preventDefault()
         const email = e.target.querySelector('input').value
         track('shop_restock_signup', { email: email, product: 'kolorabi' })
+        // Save email to localStorage
+        const emails = JSON.parse(localStorage.getItem('kolorabi_emails') || '[]')
+        emails.push({ email: email, date: new Date().toISOString() })
+        localStorage.setItem('kolorabi_emails', JSON.stringify(emails))
         e.target.style.display = 'none'
         document.getElementById('oos-success').style.display = 'flex'
       }
@@ -1078,11 +1082,179 @@ function renderShop() {
 }
 
 // ============================================================
+// פאנל אדמין (סיסמה: falafel emoji בפוטר)
+// ============================================================
+
+function openAdminPanel() {
+  const pass = prompt('🔒 הזן סיסמת אדמין:')
+  if (pass !== 'melafefon18') {
+    if (pass !== null) alert('סיסמה שגויה!!!')
+    return
+  }
+
+  track('admin_panel_open')
+
+  // Collect all comments
+  let commentsHTML = ''
+  let totalComments = 0
+  POSTS.forEach(post => {
+    const comments = getComments(post.slug)
+    if (comments.length === 0) return
+    totalComments += comments.length
+    const rows = comments.map(c => {
+      const isAuto = c.id && c.id.toString().startsWith('auto_')
+      return `<tr>
+        <td>${esc(c.author)}</td>
+        <td class="admin__comment-text">${esc(c.text).slice(0, 80)}${c.text.length > 80 ? '...' : ''}</td>
+        <td>${c.date || '—'}</td>
+        <td>${c.parentId ? 'תגובה' : 'ראשי'}</td>
+        <td>👍${c.upvotes || 0} 👎${c.downvotes || 0}</td>
+        <td>${isAuto ? '🤖' : '👤'}</td>
+      </tr>`
+    }).join('')
+    commentsHTML += `
+      <div class="admin__post-section">
+        <h3 class="admin__post-title">${esc(post.categoryEmoji)} ${esc(post.title)} <span class="admin__count">(${comments.length})</span></h3>
+        <table class="admin__table">
+          <thead><tr><th>שם</th><th>תגובה</th><th>תאריך</th><th>סוג</th><th>הצבעות</th><th>מקור</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`
+  })
+
+  // Collect emails
+  const emails = JSON.parse(localStorage.getItem('kolorabi_emails') || '[]')
+  const emailsHTML = emails.length > 0
+    ? `<table class="admin__table">
+        <thead><tr><th>#</th><th>אימייל</th><th>תאריך הרשמה</th></tr></thead>
+        <tbody>${emails.map((e, i) => `<tr><td>${i + 1}</td><td>${esc(e.email)}</td><td>${new Date(e.date).toLocaleString('he-IL')}</td></tr>`).join('')}</tbody>
+       </table>`
+    : '<p class="admin__empty">אין אימיילים רשומים עדיין</p>'
+
+  // Collect visits
+  const visits = JSON.parse(localStorage.getItem('site_visits') || '{}')
+  const visitDays = Object.keys(visits).sort().reverse()
+  const totalVisits = Object.values(visits).reduce((a, b) => a + b, 0)
+  const visitsHTML = visitDays.length > 0
+    ? `<table class="admin__table">
+        <thead><tr><th>תאריך</th><th>צפיות</th><th>גרף</th></tr></thead>
+        <tbody>${visitDays.map(d => {
+          const v = visits[d]
+          const maxV = Math.max(...Object.values(visits))
+          const barW = Math.max(5, Math.round((v / maxV) * 100))
+          return `<tr><td>${d}</td><td>${v}</td><td><div class="admin__bar" style="width:${barW}%"></div></td></tr>`
+        }).join('')}</tbody>
+       </table>`
+    : '<p class="admin__empty">אין נתוני ביקורים עדיין</p>'
+
+  const html = `
+    <section class="admin" aria-label="פאנל אדמין">
+      <div class="container">
+        <div class="admin__header">
+          <h1 class="admin__title">🔒 פאנל אדמין</h1>
+          <button class="admin__close" onclick="navigate(null)">✕ סגור</button>
+        </div>
+
+        <div class="admin__stats">
+          <div class="admin__stat-card">
+            <span class="admin__stat-num">${totalComments}</span>
+            <span class="admin__stat-label">💬 תגובות</span>
+          </div>
+          <div class="admin__stat-card">
+            <span class="admin__stat-num">${emails.length}</span>
+            <span class="admin__stat-label">📩 אימיילים</span>
+          </div>
+          <div class="admin__stat-card">
+            <span class="admin__stat-num">${totalVisits}</span>
+            <span class="admin__stat-label">👁️ צפיות</span>
+          </div>
+          <div class="admin__stat-card">
+            <span class="admin__stat-num">${visitDays.length}</span>
+            <span class="admin__stat-label">📅 ימים פעילים</span>
+          </div>
+        </div>
+
+        <div class="admin__section">
+          <h2 class="admin__section-title">👁️ ביקורים באתר</h2>
+          <p class="admin__note">סה״כ ${totalVisits} צפיות ב-${visitDays.length} ימים (מבוסס על דפדפן מקומי)</p>
+          ${visitsHTML}
+        </div>
+
+        <div class="admin__section">
+          <h2 class="admin__section-title">📩 אימיילים — רשימת המתנה לקולורבי</h2>
+          <p class="admin__note">${emails.length} נרשמים</p>
+          ${emailsHTML}
+        </div>
+
+        <div class="admin__section">
+          <h2 class="admin__section-title">💬 תגובות לפי כתבות</h2>
+          <p class="admin__note">${totalComments} תגובות ב-${POSTS.length} כתבות (🤖 = אוטומטי, 👤 = אמיתי)</p>
+          ${commentsHTML || '<p class="admin__empty">אין תגובות עדיין</p>'}
+        </div>
+
+        <div class="admin__section">
+          <h2 class="admin__section-title">🗑️ כלי ניהול</h2>
+          <div class="admin__actions">
+            <button class="admin__action-btn admin__action-btn--danger" id="admin-clear-comments">מחק את כל התגובות</button>
+            <button class="admin__action-btn admin__action-btn--danger" id="admin-clear-emails">מחק את כל האימיילים</button>
+            <button class="admin__action-btn" id="admin-clear-visits">אפס נתוני ביקורים</button>
+            <button class="admin__action-btn" id="admin-export">📋 ייצא הכל (JSON)</button>
+          </div>
+        </div>
+
+      </div>
+    </section>`
+
+  document.getElementById('main-content').innerHTML = html
+
+  // Admin action handlers
+  document.getElementById('admin-clear-comments').onclick = () => {
+    if (confirm('בטוח? זה ימחק את כל התגובות!!!')) {
+      POSTS.forEach(p => localStorage.removeItem('comments_' + p.slug))
+      localStorage.removeItem('_auto_dates')
+      openAdminPanel()
+    }
+  }
+  document.getElementById('admin-clear-emails').onclick = () => {
+    if (confirm('בטוח? זה ימחק את כל האימיילים!!!')) {
+      localStorage.removeItem('kolorabi_emails')
+      openAdminPanel()
+    }
+  }
+  document.getElementById('admin-clear-visits').onclick = () => {
+    if (confirm('בטוח? זה יאפס את נתוני הביקורים!!!')) {
+      localStorage.removeItem('site_visits')
+      openAdminPanel()
+    }
+  }
+  document.getElementById('admin-export').onclick = () => {
+    const data = { comments: {}, emails: emails, visits: visits }
+    POSTS.forEach(p => { data.comments[p.slug] = getComments(p.slug) })
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
+    const a = document.createElement('a')
+    a.href = URL.createObjectURL(blob)
+    a.download = 'yarin-blog-admin-export-' + new Date().toISOString().slice(0,10) + '.json'
+    a.click()
+  }
+
+  window.scrollTo(0, 0)
+}
+
+// ============================================================
 // ראוטר
 // ============================================================
 
+function _trackVisit() {
+  const today = new Date().toISOString().slice(0, 10)
+  const visits = JSON.parse(localStorage.getItem('site_visits') || '{}')
+  if (!visits[today]) visits[today] = 0
+  visits[today]++
+  localStorage.setItem('site_visits', JSON.stringify(visits))
+}
+
 function route() {
   _autoPopulate() // auto-generate comments silently
+  _trackVisit()
   const hash = window.location.hash
 
   // Shop pages
@@ -1152,6 +1324,16 @@ document.addEventListener('DOMContentLoaded', () => {
     dzLink.addEventListener('click', () => {
       track('footer_dapei_zahav_click', { link_url: dzLink.href })
     })
+  }
+
+  // פאנל אדמין — לחיצה על הפלאפל בפוטר
+  const footerHearts = document.querySelector('.footer__hearts')
+  if (footerHearts) {
+    footerHearts.addEventListener('click', (e) => {
+      // Check if click was near the falafel emoji
+      openAdminPanel()
+    })
+    footerHearts.style.cursor = 'default'
   }
 
   // מעקב עומק גלילה
