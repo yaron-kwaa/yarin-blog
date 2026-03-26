@@ -25,6 +25,36 @@ function calcFunc(fn) {
   if (fn === 'sqrt') { calcInput('Math.sqrt('); return }
   calcInput('Math.' + fn + '(')
 }
+function toggleCalc() {
+  const section = document.getElementById('sci-calc-section')
+  const isHidden = section.classList.contains('sci-calc--hidden')
+  if (isHidden) {
+    section.classList.remove('sci-calc--hidden')
+    section.scrollIntoView({ behavior: 'smooth' })
+    launchConfetti()
+  } else {
+    section.classList.add('sci-calc--hidden')
+  }
+}
+function launchConfetti() {
+  const container = document.getElementById('confetti-container')
+  container.innerHTML = ''
+  const colors = ['#FF6B35','#E91E8C','#00BCD4','#8B5CF6','#FFD700','#00ff88','#ff4444','#00d4aa']
+  for (let i = 0; i < 120; i++) {
+    const c = document.createElement('div')
+    c.className = 'confetti-piece'
+    c.style.left = Math.random() * 100 + '%'
+    c.style.background = colors[Math.floor(Math.random() * colors.length)]
+    c.style.animationDelay = Math.random() * 1.5 + 's'
+    c.style.animationDuration = (2 + Math.random() * 2) + 's'
+    c.style.width = (6 + Math.random() * 8) + 'px'
+    c.style.height = (6 + Math.random() * 8) + 'px'
+    c.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px'
+    c.style.transform = 'rotate(' + Math.random() * 360 + 'deg)'
+    container.appendChild(c)
+  }
+  setTimeout(() => { container.innerHTML = '' }, 4000)
+}
 function calcEqual() {
   try {
     let expr = calcExpr.replace(/\^/g, '**')
@@ -184,8 +214,12 @@ function renderHome() {
       </div>
     </section>
 
-    <!-- מחשבון מדעי -->
-    <section class="sci-calc" aria-label="מחשבון מדעי">
+    <!-- כפתור מחשבון מדעי -->
+    <div class="sci-calc-toggle-wrap">
+      <button class="sci-calc-toggle" onclick="toggleCalc()" aria-label="פתח מחשבון מדעי">🔬</button>
+    </div>
+    <section class="sci-calc sci-calc--hidden" id="sci-calc-section" aria-label="מחשבון מדעי">
+      <div id="confetti-container" class="confetti-container"></div>
       <div class="container">
         <h2 class="sci-calc__title">🔬 מחשבון מדעי 🔬</h2>
         <p class="sci-calc__subtitle">כלי חשוב וטוב למי שרוצה לחשב בצורה מדעית!!!</p>
