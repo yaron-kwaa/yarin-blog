@@ -103,6 +103,7 @@ const _POST_PUB = {
   'hummus-naji-abu-ghosh':'2026-03-19T08:30','hummus-rahmo-tel-aviv':'2026-03-20T09:00',
   'screaming-restaurant':'2026-03-21T11:00','sockmatch':'2026-03-22T10:00',
   'chachhug':'2026-03-23T08:00','hadas-lockers-gossip':'2026-03-24T12:00',
+  'kotel-hummus-arafat':'2026-03-26T10:00',
   'toxic-fish-akko':'2026-03-25T09:00'
 }
 const _AUT = [
@@ -499,7 +500,7 @@ function renderHome() {
           (או לפחות יצחיקו אתכם. שזה בעצם יותר חשוב.)
         </p>
         <div class="hero__stats" aria-label="עובדות על הבלוג">
-          <div class="hero__stat"><span class="hero__stat-number">11</span><span class="hero__stat-label">פוסטים מדהימים</span></div>
+          <div class="hero__stat"><span class="hero__stat-number">12</span><span class="hero__stat-label">פוסטים מדהימים</span></div>
           <div class="hero__stat"><span class="hero__stat-number">∞</span><span class="hero__stat-label">אהבה לחומוס</span></div>
           <div class="hero__stat"><span class="hero__stat-number">3</span><span class="hero__stat-label">רעיונות שישנו עולמות</span></div>
         </div>
