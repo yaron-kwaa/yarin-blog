@@ -523,6 +523,17 @@ function renderHome() {
       </div>
     </section>
 
+    <!-- באנר וידאו -->
+    <section class="video-banner" aria-label="באנר פרסומי" onclick="track('video_banner_click',{banner:'kolorabi'})">
+      <video class="video-banner__video" autoplay muted loop playsinline>
+        <source src="media/kolorabi-banner.mp4" type="video/mp4" />
+      </video>
+      <div class="video-banner__overlay">
+        <h2 class="video-banner__title">קולורבי ישראלי 🥬</h2>
+        <p class="video-banner__sub">נקי. טעים. בריא. ישראלי.</p>
+      </div>
+    </section>
+
     <!-- כפתורי כלים -->
     <div class="sci-calc-toggle-wrap">
       <button class="sci-calc-toggle" onclick="toggleCalc()" aria-label="פתח מחשבון מדעי">🔬</button>
