@@ -4,9 +4,86 @@
 
 // ---- מצב גלובלי ----
 let currentFilter = 'הכל'
+let currentSort = 'date' // date | popular | algorithm
 let lightboxImages = []
 let lightboxIndex = 0
 let calcExpr = ''
+
+// ---- תגובות (localStorage) ----
+function getComments(slug) {
+  try {
+    return JSON.parse(localStorage.getItem('comments_' + slug)) || []
+  } catch(e) { return [] }
+}
+function saveComments(slug, comments) {
+  localStorage.setItem('comments_' + slug, JSON.stringify(comments))
+}
+function addComment(slug, author, text, parentId) {
+  const comments = getComments(slug)
+  const comment = {
+    id: Date.now() + '_' + Math.random().toString(36).slice(2,8),
+    author: author || 'אנונימי',
+    text: text,
+    parentId: parentId || null,
+    date: new Date().toLocaleDateString('he-IL'),
+    upvotes: 0,
+    downvotes: 0,
+    voted: {} // track votes by visitorId
+  }
+  comments.push(comment)
+  saveComments(slug, comments)
+  return comment
+}
+function voteComment(slug, commentId, direction) {
+  const comments = getComments(slug)
+  const visitorId = getVisitorId()
+  const c = comments.find(x => x.id === commentId)
+  if (!c) return
+  if (!c.voted) c.voted = {}
+  const prev = c.voted[visitorId]
+  if (prev === direction) return // already voted same
+  if (prev === 'up') c.upvotes--
+  if (prev === 'down') c.downvotes--
+  if (direction === 'up') c.upvotes++
+  if (direction === 'down') c.downvotes++
+  c.voted[visitorId] = direction
+  saveComments(slug, comments)
+}
+function getVisitorId() {
+  let id = localStorage.getItem('visitor_id')
+  if (!id) { id = 'v_' + Date.now() + '_' + Math.random().toString(36).slice(2,8); localStorage.setItem('visitor_id', id) }
+  return id
+}
+
+// ---- מיון פוסטים ----
+function sortPosts(posts) {
+  const arr = [...posts]
+  if (currentSort === 'date') {
+    return arr // original order = publication order
+  }
+  if (currentSort === 'popular') {
+    // Alberto's posts first (old to new), then Yarin's
+    const alberto = arr.filter(p => p.author && p.author.includes('אלברטו'))
+    const yarin = arr.filter(p => !p.author || !p.author.includes('אלברטו'))
+    return [...alberto, ...yarin]
+  }
+  if (currentSort === 'algorithm') {
+    // "smart algorithm" = random shuffle
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]]
+    }
+    return arr
+  }
+  return arr
+}
+function setSort(s) {
+  currentSort = s
+  renderHome()
+  setTimeout(() => {
+    document.getElementById('posts')?.scrollIntoView({ behavior: 'smooth' })
+  }, 50)
+}
 
 // ---- מחשבון מדעי ----
 function calcInput(ch) {
@@ -166,9 +243,10 @@ function renderRelated(post) {
 function renderHome() {
   document.title = 'הבלוג של ירין'
 
-  const filtered = currentFilter === 'הכל'
+  const filteredRaw = currentFilter === 'הכל'
     ? POSTS
     : POSTS.filter(p => p.category === currentFilter)
+  const filtered = sortPosts(filteredRaw)
 
   const filters = ['הכל', 'מסעות', 'אוכל', 'רעיונות עסקיים', 'תרבות']
   const filterEmojis = { 'הכל': '🌟', 'מסעות': '✈️', 'אוכל': '🧆', 'רעיונות עסקיים': '💡', 'תרבות': '🎭' }
@@ -214,10 +292,20 @@ function renderHome() {
       </div>
     </section>
 
-    <!-- כפתור מחשבון מדעי -->
+    <!-- כפתורי כלים -->
     <div class="sci-calc-toggle-wrap">
       <button class="sci-calc-toggle" onclick="toggleCalc()" aria-label="פתח מחשבון מדעי">🔬</button>
+      <button class="sci-calc-toggle mult-table-toggle" onclick="toggleMultTable()" aria-label="פתח לוח הכפל">✖️</button>
     </div>
+
+    <!-- לוח הכפל -->
+    <section class="mult-table mult-table--hidden" id="mult-table-section" aria-label="לוח הכפל">
+      <div class="container">
+        <h2 class="mult-table__title">✖️ לוח הכפל לתועלת הציבור ✖️</h2>
+        ${buildMultTable()}
+      </div>
+    </section>
+
     <section class="sci-calc sci-calc--hidden" id="sci-calc-section" aria-label="מחשבון מדעי">
       <div id="confetti-container" class="confetti-container"></div>
       <div class="container">
@@ -270,6 +358,12 @@ function renderHome() {
           <p class="posts-section__subtitle">כי ירין כתב המון ואתם תקראו הכל!!!</p>
         </div>
         <div class="filter-bar" role="group" aria-label="סנן לפי קטגוריה">${filterHTML}</div>
+        <div class="sort-bar" role="group" aria-label="מיון פוסטים">
+          <span class="sort-bar__label">🔀 מיון:</span>
+          <button class="sort-btn ${currentSort === 'date' ? 'active' : ''}" onclick="setSort('date')">📅 סדר פרסום</button>
+          <button class="sort-btn ${currentSort === 'popular' ? 'active' : ''}" onclick="setSort('popular')">🔥 פופולריות</button>
+          <button class="sort-btn ${currentSort === 'algorithm' ? 'active' : ''}" onclick="setSort('algorithm')">🧠 אלגוריתם חכם</button>
+        </div>
         <div class="posts-grid" aria-live="polite">${gridHTML}</div>
       </div>
     </main>`
@@ -350,6 +444,21 @@ function renderPost(slug) {
       </div>
     </div>
 
+    <!-- תגובות -->
+    <section class="comments-section" aria-label="תגובות">
+      <div class="container">
+        <h2 class="comments-section__title">💬 תגובות</h2>
+        <div class="comment-form-wrap" id="comment-form-root">
+          <div class="comment-form">
+            <input type="text" id="comment-author" class="comment-form__input" placeholder="השם שלך (אופציונלי)" maxlength="50" />
+            <textarea id="comment-text" class="comment-form__textarea" placeholder="כתבו תגובה..." rows="3" maxlength="1000"></textarea>
+            <button class="comment-form__btn" onclick="submitComment('${esc(post.slug)}', null)">📤 שלח תגובה</button>
+          </div>
+        </div>
+        <div id="comments-list" class="comments-list"></div>
+      </div>
+    </section>
+
     ${renderRelated(post)}`
 
   document.getElementById('main-content').innerHTML = html
@@ -357,6 +466,122 @@ function renderPost(slug) {
 
   // הכנת לייטבוקס
   lightboxImages = post.images || []
+
+  // רינדור תגובות
+  renderComments(post.slug)
+}
+
+// ============================================================
+// תגובות — רינדור ושליחה
+// ============================================================
+
+function renderComments(slug) {
+  const comments = getComments(slug)
+  const list = document.getElementById('comments-list')
+  if (!list) return
+
+  // Build tree
+  const roots = comments.filter(c => !c.parentId)
+  const children = (parentId) => comments.filter(c => c.parentId === parentId)
+
+  function renderSingleComment(c, depth) {
+    const replies = children(c.id)
+    const depthClass = depth > 0 ? 'comment--reply' : ''
+    const indent = Math.min(depth, 3) * 24
+
+    return `
+      <div class="comment ${depthClass}" style="margin-right:${indent}px" id="comment-${c.id}">
+        <div class="comment__header">
+          <span class="comment__author">${esc(c.author)}</span>
+          <span class="comment__date">${esc(c.date)}</span>
+        </div>
+        <p class="comment__text">${esc(c.text)}</p>
+        <div class="comment__actions">
+          <button class="comment__vote comment__vote--up" onclick="handleVote('${esc(slug)}','${c.id}','up')">👍 <span>${c.upvotes || 0}</span></button>
+          <button class="comment__vote comment__vote--down" onclick="handleVote('${esc(slug)}','${c.id}','down')">👎 <span>${c.downvotes || 0}</span></button>
+          <button class="comment__reply-btn" onclick="showReplyForm('${esc(slug)}','${c.id}')">↩️ הגב</button>
+        </div>
+        <div id="reply-form-${c.id}" class="reply-form-slot"></div>
+        ${replies.map(r => renderSingleComment(r, depth + 1)).join('')}
+      </div>`
+  }
+
+  const totalCount = comments.length
+  list.innerHTML = (totalCount === 0
+    ? '<p class="comments-empty">אין תגובות עדיין. היו הראשונים! 🎉</p>'
+    : roots.map(c => renderSingleComment(c, 0)).join(''))
+}
+
+function submitComment(slug, parentId) {
+  let authorEl, textEl
+  if (parentId) {
+    const form = document.getElementById('reply-form-' + parentId)
+    authorEl = form.querySelector('.reply-author')
+    textEl = form.querySelector('.reply-text')
+  } else {
+    authorEl = document.getElementById('comment-author')
+    textEl = document.getElementById('comment-text')
+  }
+  const text = textEl.value.trim()
+  if (!text) { textEl.style.borderColor = '#ff4444'; return }
+  const author = authorEl.value.trim() || 'אנונימי'
+  addComment(slug, author, text, parentId)
+  if (!parentId) { authorEl.value = ''; textEl.value = '' }
+  renderComments(slug)
+}
+
+function showReplyForm(slug, parentId) {
+  const slot = document.getElementById('reply-form-' + parentId)
+  if (!slot || slot.innerHTML.trim()) { slot.innerHTML = ''; return } // toggle
+  slot.innerHTML = `
+    <div class="comment-form comment-form--reply">
+      <input type="text" class="comment-form__input reply-author" placeholder="השם שלך" maxlength="50" />
+      <textarea class="comment-form__textarea reply-text" placeholder="כתבו תגובה..." rows="2" maxlength="1000"></textarea>
+      <button class="comment-form__btn comment-form__btn--reply" onclick="submitComment('${esc(slug)}','${parentId}')">📤 שלח</button>
+    </div>`
+}
+
+function handleVote(slug, commentId, direction) {
+  voteComment(slug, commentId, direction)
+  renderComments(slug)
+}
+
+// ============================================================
+// לוח הכפל
+// ============================================================
+
+function toggleMultTable() {
+  const section = document.getElementById('mult-table-section')
+  const isHidden = section.classList.contains('mult-table--hidden')
+  if (isHidden) {
+    section.classList.remove('mult-table--hidden')
+    section.scrollIntoView({ behavior: 'smooth' })
+  } else {
+    section.classList.add('mult-table--hidden')
+  }
+}
+
+function buildMultTable() {
+  const colors = [
+    '#8B5CF6','#6366F1','#3B82F6','#06B6D4','#10B981',
+    '#84CC16','#EAB308','#F97316','#EF4444','#EC4899'
+  ]
+  let html = '<table class="mult-table__grid"><thead><tr><th class="mult-table__corner">×</th>'
+  for (let j = 1; j <= 10; j++) {
+    html += `<th class="mult-table__head" style="background:${colors[j-1]}">${j}</th>`
+  }
+  html += '</tr></thead><tbody>'
+  for (let i = 1; i <= 10; i++) {
+    html += `<tr><th class="mult-table__row-head" style="background:${colors[i-1]}">${i}</th>`
+    for (let j = 1; j <= 10; j++) {
+      const val = i * j
+      const mix = colors[Math.floor((i + j - 2) / 2) % colors.length]
+      html += `<td class="mult-table__cell" style="background:${mix}22; color:${mix}">${val}</td>`
+    }
+    html += '</tr>'
+  }
+  html += '</tbody></table>'
+  return html
 }
 
 // ============================================================

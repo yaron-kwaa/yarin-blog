@@ -592,6 +592,11 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   .post-content__para { font-size: 1rem; padding: 14px 16px; }
   .gallery__grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
   .sci-calc__buttons { grid-template-columns: repeat(4, 1fr); }
+  .mult-table__grid { font-size: .7rem; }
+  .mult-table__grid th, .mult-table__grid td { width: 32px; height: 30px; }
+  .mult-table__title { font-size: 1.4rem; }
+  .comment { padding: 12px 14px; }
+  .comment--reply { margin-right: 12px !important; }
 }
 
 /* ---- כפתור מחשבון מדעי ---- */
@@ -683,6 +688,175 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   background: linear-gradient(135deg, #00d4aa, #00bcd4); color: #0a0a1a; font-size: 1.3rem;
 }
 .sci-calc__btn--eq:hover { background: linear-gradient(135deg, #00ffcc, #00ddf0); }
+
+/* ============================================================
+   מיון פוסטים
+   ============================================================ */
+
+.sort-bar {
+  display: flex; flex-wrap: wrap; gap: 10px;
+  justify-content: center; align-items: center;
+  margin-bottom: 28px;
+}
+.sort-bar__label {
+  font-size: .875rem; font-weight: 700; color: var(--muted);
+}
+.sort-btn {
+  font-size: .8rem; font-weight: 700;
+  padding: 6px 16px; border-radius: var(--r-full);
+  border: 2px solid var(--border); background: var(--white);
+  color: var(--muted); cursor: pointer; transition: all var(--bounce);
+}
+.sort-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+.sort-btn.active {
+  background: linear-gradient(135deg, var(--accent), var(--purple));
+  color: var(--white) !important; border-color: transparent !important;
+  box-shadow: var(--shadow-sm); transform: translateY(-2px);
+}
+
+/* ============================================================
+   תגובות
+   ============================================================ */
+
+.comments-section {
+  padding: 48px 0 64px;
+  background: var(--bg-alt);
+  border-top: 3px dashed var(--border);
+}
+.comments-section__title {
+  font-size: 1.75rem; font-weight: 900; margin-bottom: 24px;
+}
+.comment-form {
+  display: flex; flex-direction: column; gap: 12px;
+  background: var(--white); padding: 20px; border-radius: var(--r-md);
+  box-shadow: var(--shadow-sm); margin-bottom: 24px;
+}
+.comment-form--reply {
+  margin-top: 12px; margin-bottom: 0;
+  background: var(--bg); border: 1px solid var(--border);
+}
+.comment-form__input {
+  font-family: inherit; font-size: .9rem; padding: 10px 14px;
+  border: 2px solid var(--border); border-radius: var(--r-sm);
+  background: var(--bg); color: var(--text); transition: border-color var(--trans);
+}
+.comment-form__input:focus { border-color: var(--primary); outline: none; }
+.comment-form__textarea {
+  font-family: inherit; font-size: .9rem; padding: 10px 14px;
+  border: 2px solid var(--border); border-radius: var(--r-sm);
+  background: var(--bg); color: var(--text); resize: vertical;
+  min-height: 60px; transition: border-color var(--trans);
+}
+.comment-form__textarea:focus { border-color: var(--primary); outline: none; }
+.comment-form__btn {
+  align-self: flex-start;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: var(--white); font-size: .9rem; font-weight: 800;
+  padding: 10px 24px; border-radius: var(--r-full);
+  border: none; cursor: pointer; transition: all var(--bounce);
+}
+.comment-form__btn:hover { transform: translateY(-2px) scale(1.03); box-shadow: var(--shadow-md); }
+.comment-form__btn--reply { font-size: .8rem; padding: 8px 18px; }
+
+.comments-list { display: flex; flex-direction: column; gap: 16px; }
+.comments-empty { text-align: center; color: var(--muted); font-size: 1rem; padding: 24px 0; }
+
+.comment {
+  background: var(--white); border-radius: var(--r-md);
+  padding: 16px 20px; box-shadow: var(--shadow-sm);
+  border-right: 3px solid var(--primary);
+  animation: slide-up .3s ease both;
+}
+.comment--reply {
+  border-right-color: var(--accent);
+  background: #fafaf5;
+}
+.comment__header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
+}
+.comment__author {
+  font-size: .9rem; font-weight: 800; color: var(--primary);
+}
+.comment__date {
+  font-size: .75rem; color: var(--muted);
+}
+.comment__text {
+  font-size: .95rem; line-height: 1.7; color: var(--text); margin-bottom: 10px;
+}
+.comment__actions {
+  display: flex; gap: 12px; align-items: center;
+}
+.comment__vote {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: .8rem; padding: 4px 10px; border-radius: var(--r-full);
+  border: 1px solid var(--border); background: var(--bg);
+  cursor: pointer; transition: all var(--trans); color: var(--muted);
+}
+.comment__vote:hover { background: var(--white); border-color: var(--primary); }
+.comment__vote--up:hover { color: #10B981; border-color: #10B981; }
+.comment__vote--down:hover { color: #EF4444; border-color: #EF4444; }
+.comment__reply-btn {
+  font-size: .8rem; color: var(--accent); font-weight: 700;
+  cursor: pointer; background: none; border: none;
+  transition: color var(--trans);
+}
+.comment__reply-btn:hover { color: var(--primary); }
+.reply-form-slot { margin-top: 8px; }
+
+/* ============================================================
+   לוח הכפל
+   ============================================================ */
+
+.mult-table {
+  position: relative; padding: 48px 0; text-align: center;
+  background: linear-gradient(160deg, #fff9e6 0%, #f0f8ff 50%, #fff0f5 100%);
+  transition: max-height .5s ease, opacity .4s ease, padding .4s ease;
+  overflow: hidden;
+  border-bottom: 4px dashed var(--border);
+}
+.mult-table--hidden {
+  max-height: 0; opacity: 0; padding: 0; pointer-events: none;
+}
+.mult-table__title {
+  font-size: 2rem; font-weight: 900; margin-bottom: 24px;
+  background: linear-gradient(135deg, var(--primary), var(--purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.mult-table__grid {
+  margin: 0 auto; border-collapse: collapse; border-radius: var(--r-md);
+  overflow: hidden; box-shadow: var(--shadow-md);
+  font-size: 1rem; font-weight: 700;
+}
+.mult-table__grid th, .mult-table__grid td {
+  width: 48px; height: 44px; text-align: center; vertical-align: middle;
+  border: 1px solid rgba(0,0,0,.08);
+}
+.mult-table__corner {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white; font-size: 1.2rem;
+}
+.mult-table__head {
+  color: white; font-size: 1.1rem; font-weight: 900;
+}
+.mult-table__row-head {
+  color: white; font-size: 1.1rem; font-weight: 900;
+}
+.mult-table__cell {
+  font-weight: 800; font-size: .95rem;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.mult-table__cell:hover {
+  transform: scale(1.3); z-index: 2; position: relative;
+  box-shadow: 0 4px 16px rgba(0,0,0,.2);
+  border-radius: 4px;
+}
+.mult-table-toggle {
+  background: linear-gradient(135deg, #EAB308, #F97316) !important;
+  color: white; border-color: #EAB308 !important;
+}
+.mult-table-toggle:hover {
+  border-color: #F97316 !important;
+}
 
 /* Small mobile */
 @media (max-width: 480px) {
