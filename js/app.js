@@ -523,15 +523,11 @@ function renderHome() {
       </div>
     </section>
 
-    <!-- באנר וידאו -->
-    <section class="video-banner" aria-label="באנר פרסומי" onclick="track('video_banner_click',{banner:'kolorabi'})">
+    <!-- באנר וידאו רחב (1920x600) -->
+    <section class="video-banner video-banner--hero" onclick="track('video_banner_click',{banner:'kolorabi-hero'})">
       <video class="video-banner__video" autoplay muted loop playsinline>
-        <source src="media/kolorabi-banner.mp4" type="video/mp4" />
+        <source src="media/kolorabi-hero.mp4" type="video/mp4" />
       </video>
-      <div class="video-banner__overlay">
-        <h2 class="video-banner__title">קולורבי ישראלי 🥬</h2>
-        <p class="video-banner__sub">נקי. טעים. בריא. ישראלי.</p>
-      </div>
     </section>
 
     <!-- כפתורי כלים -->
@@ -606,9 +602,23 @@ function renderHome() {
           <button class="sort-btn ${currentSort === 'popular' ? 'active' : ''}" onclick="setSort('popular')">🔥 פופולריות</button>
           <button class="sort-btn ${currentSort === 'algorithm' ? 'active' : ''}" onclick="setSort('algorithm')">🧠 אלגוריתם חכם</button>
         </div>
-        <div class="posts-grid" aria-live="polite">${gridHTML}</div>
+        <div class="posts-layout">
+          <div class="posts-grid" aria-live="polite">${gridHTML}</div>
+          <aside class="video-banner video-banner--square" onclick="track('video_banner_click',{banner:'kolorabi-square'})">
+            <video class="video-banner__video" autoplay muted loop playsinline>
+              <source src="media/kolorabi-square.mp4" type="video/mp4" />
+            </video>
+          </aside>
+        </div>
       </div>
-    </main>`
+    </main>
+
+    <!-- באנר וידאו סטריפ (1920x300) -->
+    <section class="video-banner video-banner--strip" onclick="track('video_banner_click',{banner:'kolorabi-strip'})">
+      <video class="video-banner__video" autoplay muted loop playsinline>
+        <source src="media/kolorabi-strip.mp4" type="video/mp4" />
+      </video>
+    </section>`
 
   document.getElementById('main-content').innerHTML = html
   document.getElementById('nav-home').classList.add('active')

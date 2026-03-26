@@ -599,31 +599,54 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
   .comment--reply { margin-right: 12px !important; }
 }
 
-/* ---- באנר וידאו ---- */
+/* ---- באנרי וידאו ---- */
 .video-banner {
-  position: relative; overflow: hidden;
-  height: 320px; display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden; cursor: pointer;
 }
 .video-banner__video {
-  position: absolute; inset: 0; width: 100%; height: 100%;
-  object-fit: cover; z-index: 0;
+  width: 100%; height: 100%; display: block;
+  object-fit: cover;
 }
-.video-banner__overlay {
-  position: relative; z-index: 1; text-align: center;
-  background: rgba(0,0,0,.45); padding: 32px 48px;
-  border-radius: var(--r-lg); backdrop-filter: blur(4px);
+
+/* באנר הירו רחב */
+.video-banner--hero {
+  max-height: 600px;
 }
-.video-banner__title {
-  font-size: clamp(1.75rem, 5vw, 2.5rem); font-weight: 900;
-  color: #fff; margin-bottom: 8px; text-shadow: 0 2px 12px rgba(0,0,0,.4);
+.video-banner--hero .video-banner__video {
+  object-fit: contain; background: #000;
 }
-.video-banner__sub {
-  font-size: 1.1rem; color: rgba(255,255,255,.9); font-weight: 600;
-  text-shadow: 0 1px 6px rgba(0,0,0,.3);
+
+/* באנר ריבועי — סיידבר ליד הפוסטים */
+.video-banner--square {
+  width: 300px; min-width: 300px;
+  border-radius: var(--r-lg); overflow: hidden;
+  box-shadow: var(--shadow-md);
+  align-self: flex-start; position: sticky; top: 80px;
 }
-@media (max-width: 600px) {
-  .video-banner { height: 220px; }
-  .video-banner__overlay { padding: 20px 28px; }
+.video-banner--square .video-banner__video {
+  aspect-ratio: 1/1; object-fit: cover;
+}
+
+/* באנר סטריפ */
+.video-banner--strip {
+  max-height: 300px;
+}
+
+/* layout פוסטים + סיידבר */
+.posts-layout {
+  display: flex; gap: 32px; align-items: flex-start;
+}
+.posts-layout > .posts-grid { flex: 1; min-width: 0; }
+
+@media (max-width: 900px) {
+  .posts-layout { flex-direction: column; }
+  .video-banner--square {
+    width: 100%; min-width: auto;
+    max-height: 400px; position: static;
+  }
+  .video-banner--square .video-banner__video {
+    aspect-ratio: auto; max-height: 400px;
+  }
 }
 
 /* ---- כפתור מחשבון מדעי ---- */
