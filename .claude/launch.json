@@ -4,7 +4,7 @@
     {
       "name": "blog",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["http-server", ".", "-p", "8080", "-c-1"],
+      "runtimeArgs": ["http-server", "-p", "8080", "-c-1"],
       "port": 8080
     }
   ]
