@@ -2,6 +2,13 @@
 // הבלוג של ירין — JavaScript ראשי
 // ============================================================
 
+// ---- Google Analytics helper ----
+function track(eventName, params) {
+  if (typeof gtag === 'function') {
+    gtag('event', eventName, params || {})
+  }
+}
+
 // ---- מצב גלובלי ----
 let currentFilter = 'הכל'
 let currentSort = 'date' // date | popular | algorithm
@@ -78,6 +85,7 @@ function sortPosts(posts) {
   return arr
 }
 function setSort(s) {
+  track('sort_change', { sort_type: s })
   currentSort = s
   renderHome()
   setTimeout(() => {
@@ -105,6 +113,7 @@ function calcFunc(fn) {
 function toggleCalc() {
   const section = document.getElementById('sci-calc-section')
   const isHidden = section.classList.contains('sci-calc--hidden')
+  track('calculator_toggle', { action: isHidden ? 'open' : 'close' })
   if (isHidden) {
     section.classList.remove('sci-calc--hidden')
     section.scrollIntoView({ behavior: 'smooth' })
@@ -137,9 +146,11 @@ function calcEqual() {
     let expr = calcExpr.replace(/\^/g, '**')
     let result = Function('"use strict"; return (' + expr + ')')()
     result = Number(result) + 333
+    track('calculator_compute', { expression: calcExpr, result: result })
     document.getElementById('calc-display').textContent = result
     calcExpr = String(result)
   } catch(e) {
+    track('calculator_error', { expression: calcExpr })
     document.getElementById('calc-display').textContent = 'שגיאה!!!'
     calcExpr = ''
   }
@@ -154,8 +165,10 @@ function getSlug() {
 
 function navigate(slug) {
   if (slug) {
+    track('post_click', { post_slug: slug, post_title: (POSTS.find(p=>p.slug===slug)||{}).title })
     window.location.hash = '#/post/' + slug
   } else {
+    track('navigate_home')
     window.location.hash = '#/'
   }
 }
@@ -285,7 +298,7 @@ function renderHome() {
           <div class="hero__stat"><span class="hero__stat-number">∞</span><span class="hero__stat-label">אהבה לחומוס</span></div>
           <div class="hero__stat"><span class="hero__stat-number">3</span><span class="hero__stat-label">רעיונות שישנו עולמות</span></div>
         </div>
-        <button class="hero__cta" onclick="document.getElementById('posts').scrollIntoView({behavior:'smooth'})">
+        <button class="hero__cta" onclick="track('hero_cta_click');document.getElementById('posts').scrollIntoView({behavior:'smooth'})">
           <span>קראו את הפוסטים!!!</span>
           <span class="hero__cta-arrow" aria-hidden="true">👇</span>
         </button>
@@ -373,6 +386,7 @@ function renderHome() {
 }
 
 function setFilter(f) {
+  track('filter_change', { filter_category: f })
   currentFilter = f
   renderHome()
   // גלילה לרשימה
@@ -526,6 +540,7 @@ function submitComment(slug, parentId) {
   if (!text) { textEl.style.borderColor = '#ff4444'; return }
   const author = authorEl.value.trim() || 'אנונימי'
   addComment(slug, author, text, parentId)
+  track('comment_submit', { post_slug: slug, is_reply: !!parentId, author_name: author })
   if (!parentId) { authorEl.value = ''; textEl.value = '' }
   renderComments(slug)
 }
@@ -542,6 +557,7 @@ function showReplyForm(slug, parentId) {
 }
 
 function handleVote(slug, commentId, direction) {
+  track('comment_vote', { post_slug: slug, vote_direction: direction })
   voteComment(slug, commentId, direction)
   renderComments(slug)
 }
@@ -553,6 +569,7 @@ function handleVote(slug, commentId, direction) {
 function toggleMultTable() {
   const section = document.getElementById('mult-table-section')
   const isHidden = section.classList.contains('mult-table--hidden')
+  track('mult_table_toggle', { action: isHidden ? 'open' : 'close' })
   if (isHidden) {
     section.classList.remove('mult-table--hidden')
     section.scrollIntoView({ behavior: 'smooth' })
@@ -590,12 +607,15 @@ function buildMultTable() {
 
 function openLightbox(index) {
   lightboxIndex = index
+  const img = lightboxImages[index]
+  track('lightbox_open', { image_index: index, image_alt: img ? img.alt : '' })
   updateLightbox()
   document.getElementById('lightbox').classList.add('open')
   document.body.style.overflow = 'hidden'
 }
 
 function closeLightbox() {
+  track('lightbox_close')
   document.getElementById('lightbox').classList.remove('open')
   document.body.style.overflow = ''
 }
@@ -626,8 +646,22 @@ function updateLightbox() {
 function route() {
   const slug = getSlug()
   if (slug) {
+    const post = POSTS.find(p => p.slug === slug)
+    track('page_view', {
+      page_title: post ? post.title : slug,
+      page_location: window.location.href,
+      page_path: '/post/' + slug,
+      content_type: 'post',
+      post_category: post ? post.category : '',
+      post_author: post ? (post.author || 'ירין') : ''
+    })
     renderPost(slug)
   } else {
+    track('page_view', {
+      page_title: 'דף הבית',
+      page_location: window.location.href,
+      page_path: '/'
+    })
     renderHome()
   }
 }
@@ -658,6 +692,34 @@ document.addEventListener('DOMContentLoaded', () => {
       if (e.key === 'ArrowLeft')  lightboxNext()
       if (e.key === 'ArrowRight') lightboxPrev()
     }
+  })
+
+  // מעקב קליק על קישור דפי זהב בפוטר
+  const dzLink = document.querySelector('.footer__dz')
+  if (dzLink) {
+    dzLink.addEventListener('click', () => {
+      track('footer_dapei_zahav_click', { link_url: dzLink.href })
+    })
+  }
+
+  // מעקב עומק גלילה
+  let scrollMilestones = { 25: false, 50: false, 75: false, 100: false }
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight
+    if (docHeight <= 0) return
+    const pct = Math.round((scrollTop / docHeight) * 100)
+    for (const m of [25, 50, 75, 100]) {
+      if (pct >= m && !scrollMilestones[m]) {
+        scrollMilestones[m] = true
+        track('scroll_depth', { percent: m, page: window.location.hash || '/' })
+      }
+    }
+  })
+
+  // אפס מיילסטונים בניווט
+  window.addEventListener('hashchange', () => {
+    scrollMilestones = { 25: false, 50: false, 75: false, 100: false }
   })
 
   // render ראשוני
