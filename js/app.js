@@ -1103,10 +1103,13 @@ function openAdminPanel() {
   // Collect all comments
   let commentsHTML = ''
   let totalComments = 0
+  const postCommentData = []
   POSTS.forEach(post => {
     const comments = getComments(post.slug)
     if (comments.length === 0) return
     totalComments += comments.length
+    const realCount = comments.filter(c => !(c.id && c.id.toString().startsWith('auto_'))).length
+    const autoCount = comments.length - realCount
     const rows = comments.map(c => {
       const isAuto = c.id && c.id.toString().startsWith('auto_')
       return `<tr>
@@ -1119,12 +1122,18 @@ function openAdminPanel() {
       </tr>`
     }).join('')
     commentsHTML += `
-      <div class="admin__post-section">
-        <h3 class="admin__post-title">${esc(post.categoryEmoji)} ${esc(post.title)} <span class="admin__count">(${comments.length})</span></h3>
-        <table class="admin__table">
-          <thead><tr><th>שם</th><th>תגובה</th><th>תאריך</th><th>סוג</th><th>הצבעות</th><th>מקור</th></tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
+      <div class="admin__accordion" data-slug="${esc(post.slug)}">
+        <button class="admin__accordion-btn" onclick="this.parentElement.classList.toggle('open')">
+          <span class="admin__accordion-title">${esc(post.categoryEmoji)} ${esc(post.title)}</span>
+          <span class="admin__accordion-meta">💬 ${comments.length} <small>(👤${realCount} 🤖${autoCount})</small></span>
+          <span class="admin__accordion-arrow">◀</span>
+        </button>
+        <div class="admin__accordion-body">
+          <table class="admin__table">
+            <thead><tr><th>שם</th><th>תגובה</th><th>תאריך</th><th>סוג</th><th>הצבעות</th><th>מקור</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
       </div>`
   })
 

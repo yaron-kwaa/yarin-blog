@@ -1092,6 +1092,23 @@ button { font-family: inherit; cursor: pointer; border: none; background: none; 
 .admin__table tr:hover td { background: #FFFBF0; }
 .admin__comment-text { max-width: 300px; word-break: break-word; }
 
+.admin__accordion { border: 2px solid var(--border); border-radius: var(--r-md); margin-bottom: 8px; overflow: hidden; }
+.admin__accordion-btn {
+  width: 100%; display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+  background: var(--bg-alt); text-align: right; font-weight: 600; font-size: .95rem;
+  transition: var(--trans); cursor: pointer; border: none; font-family: inherit;
+}
+.admin__accordion-btn:hover { background: var(--border); }
+.admin__accordion-title { flex: 1; }
+.admin__accordion-meta { font-size: .8rem; color: var(--muted); white-space: nowrap; }
+.admin__accordion-meta small { font-size: .75rem; }
+.admin__accordion-arrow { transition: transform .2s ease; font-size: .7rem; color: var(--muted); }
+.admin__accordion.open .admin__accordion-arrow { transform: rotate(-90deg); }
+.admin__accordion-body {
+  max-height: 0; overflow: hidden; transition: max-height .3s ease;
+}
+.admin__accordion.open .admin__accordion-body { max-height: 5000px; }
+
 .admin__post-section { margin-bottom: 24px; }
 .admin__post-title { font-size: 1rem; font-weight: 700; margin-bottom: 8px; color: var(--primary); }
 .admin__count { font-weight: 400; color: var(--muted); }
