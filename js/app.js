@@ -393,7 +393,8 @@ function esc(str) {
 
 // ---- כרטיס קטגוריה ----
 function categoryLabel(post) {
-  return `<span class="post-card__category cat--${esc(post.colorClass)}">${esc(post.categoryEmoji)} ${esc(post.category)}</span>`
+  const tagBadge = post.tag ? `<span class="post-card__tag tag--sponsored">📢 ${esc(post.tag)}</span>` : ''
+  return `<span class="post-card__category cat--${esc(post.colorClass)}">${esc(post.categoryEmoji)} ${esc(post.category)}</span>${tagBadge}`
 }
 
 // ---- HTML כרטיס ----
@@ -670,6 +671,7 @@ function renderPost(slug) {
         </button>
         <div class="post-header__meta">
           <span class="post-header__category cat--${esc(post.colorClass)}">${esc(post.categoryEmoji)} ${esc(post.category)}</span>
+          ${post.tag ? `<span class="post-header__tag tag--sponsored">📢 ${esc(post.tag)}</span>` : ''}
           ${post.author ? `<span class="post-header__author">✍️ מאת: ${esc(post.author)}</span>` : ''}
         </div>
         <h1 class="post-header__title">${esc(post.title)}</h1>
