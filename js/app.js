@@ -108,7 +108,8 @@ const _POST_PUB = {
   'chachhug':'2026-03-23T08:00','hadas-lockers-gossip':'2026-03-24T12:00',
   'kotel-hummus-arafat':'2026-03-26T10:00',
   'toxic-fish-akko':'2026-03-25T09:00',
-  'alberto-kohlrabi':'2026-03-27T08:00'
+  'alberto-kohlrabi':'2026-03-27T08:00',
+  'alberto-shopping-list':'2026-03-29T07:00'
 }
 const _AUT = [
   'עם ישראל','רק ביבי','פלפל מתוק','אוהב את המדינה','ימין חזק','שמאל מתון',
@@ -258,7 +259,8 @@ function _autoPopulate() {
 
     if (hoursSince < 0.5) return
 
-    const TOTAL = 58
+    const rngTotal = _sr(_sh(post.slug + '_total'))
+    const TOTAL = 38 + Math.floor(rngTotal() * 30)
     const targetCount = Math.min(TOTAL, Math.floor(TOTAL * (1 - Math.exp(-hoursSince / 14))))
     if (targetCount < 1) return
 
