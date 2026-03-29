@@ -575,6 +575,9 @@ function renderHome() {
       </div>
     </section>
 
+    <!-- באנר צ'יקי-קנטיקי -->
+    ${renderChikiBanner()}
+
     <!-- פוסטים -->
     <main id="posts" class="posts-section" aria-label="כל הפוסטים">
       <div class="container">
@@ -1286,6 +1289,12 @@ function route() {
   _autoPopulate() // auto-generate comments silently
   _trackVisit()
   const hash = window.location.hash
+
+  // צ'יקי-קנטיקי
+  if (hash === '#/chiki-kantiki') {
+    renderChikiPage()
+    return
+  }
 
   // Shop pages
   if (hash.startsWith('#/shop/')) {
