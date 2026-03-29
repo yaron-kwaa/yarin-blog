@@ -66,7 +66,7 @@ function getVisitorId() {
 function sortPosts(posts) {
   const arr = [...posts]
   if (currentSort === 'date') {
-    return arr // original order = publication order
+    return arr.sort((a, b) => new Date(_getPubDate(b.slug) || 0) - new Date(_getPubDate(a.slug) || 0))
   }
   if (currentSort === 'popular') {
     // Alberto's posts first (old to new), then Yarin's
