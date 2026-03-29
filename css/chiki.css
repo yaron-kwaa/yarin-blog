@@ -258,6 +258,62 @@
 }
 .chiki-popup-cancel:hover { border-color: #2d6a4f; color: #2d6a4f; }
 
+/* פופאפ גיא אלבז — דרמטי */
+@keyframes alarm-flash {
+  0%, 100% { background: rgba(0,0,0,.7); }
+  50%       { background: rgba(180,0,0,.55); }
+}
+@keyframes alarm-shake {
+  0%, 100%         { transform: translateX(0) rotate(0deg); }
+  10%, 50%, 90%    { transform: translateX(-7px) rotate(-.4deg); }
+  20%, 40%, 60%, 80% { transform: translateX(7px) rotate(.4deg); }
+  30%, 70%         { transform: translateX(-4px); }
+}
+@keyframes siren-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: .4; transform: scale(1.3); }
+}
+@keyframes code-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+.chiki-blocked-overlay {
+  animation: alarm-flash .45s ease-in-out infinite !important;
+}
+.chiki-blocked-popup {
+  border-top: 6px solid #e63946;
+  animation: alarm-shake .35s ease-in-out infinite;
+  background: #fff;
+}
+.chiki-blocked-sirens {
+  font-size: 2.2rem;
+  animation: siren-pulse .5s ease-in-out infinite;
+  margin-bottom: 6px;
+  letter-spacing: 6px;
+}
+.chiki-blocked-code {
+  font-family: monospace; font-size: .72rem; font-weight: 700;
+  color: #e63946; letter-spacing: .06em;
+  margin-bottom: 10px;
+  animation: code-blink .8s step-end infinite;
+}
+.chiki-blocked-title {
+  color: #e63946 !important;
+  font-size: 1.6rem !important;
+  letter-spacing: .05em;
+}
+.chiki-blocked-text {
+  background: #ffe8e8 !important;
+  border: 1px solid #f5a0a0;
+  text-align: right;
+}
+.chiki-blocked-btn {
+  border-color: #e63946 !important; color: #e63946 !important;
+  font-weight: 900 !important; font-size: 1rem !important;
+}
+.chiki-blocked-btn:hover { background: #e63946 !important; color: white !important; }
+
 /* ריספונסיב */
 @media (max-width: 640px) {
   .chiki-card { padding: 20px 16px; }

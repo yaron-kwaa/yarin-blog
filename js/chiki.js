@@ -19,6 +19,7 @@ const PRISONERS = [
   { name: 'ברוך אוחנה',      accusation: 'שולט בשלט הרחוק ועובר לחדשות בדיוק כשמישהו אחר רצה לראות משהו' },
   { name: 'בלה ניסים',       accusation: 'אוכלת בקול רם מאוד. ממש מאוד. כולם ביקשו ממנה. היא לא מקשיבה.' },
   // ג
+  { name: 'גיא אלבז',        accusation: 'עדיין לא ברור מה הוא עשה. גם לו לא ברור.', blocked: true },
   { name: 'גדי עמר',         accusation: 'אחראי לריח המסתורי בתא 7 ועדיין מסרב להודות' },
   { name: 'גבריאל חדד',      accusation: 'גנב את הסבון של כולם ואמר שהוא חשב שזה שלו' },
   { name: 'גיורא ביטון',     accusation: 'הפסיק לשלם את חלקו בארנונה המשותפת ואומר שהוא בקשיים' },
@@ -101,15 +102,14 @@ const PRISONERS = [
 // ============================================================
 
 let chikiState = {
-  prisoner:   null,   // { name, accusation }
-  amount:     null,   // number
-  step:       1,      // 1 | 2 | 3 | 4
-  popupShown: false,
+  prisoner:    null,   // { name, accusation }
+  amount:      null,   // number
+  step:        1,      // 1 | 2 | 3 | 4
   searchQuery: ''
 }
 
 function chikiReset() {
-  chikiState = { prisoner: null, amount: null, step: 1, popupShown: false, searchQuery: '' }
+  chikiState = { prisoner: null, amount: null, step: 1, searchQuery: '' }
 }
 
 // ============================================================
@@ -307,20 +307,63 @@ function chikiStep4HTML() {
 }
 
 // ============================================================
-// פופאפ אזהרה
+// פופאפ אזהרה — נימוקים מתחלפים
 // ============================================================
 
-function chikiPopupHTML() {
+let _chikiWarnIdx = 0
+
+function _getChikiWarning() {
   const p = chikiState.prisoner
+  const warnings = [
+    {
+      icon: '⚠️',
+      title: 'רגע לפני שממשיכים...',
+      text: `לידיעתך, <strong>${esc(p.name)}</strong> ${esc(p.accusation)}.`
+    },
+    {
+      icon: '🕵️',
+      title: 'התראת אבטחה',
+      text: 'המערכת זיהתה פעילות חריגה בחשבונך.<br/>כל הפעולות מתועדות ומשודרות לגורם שלישי לא ידוע.<br/>המשך/י על אחריותך.'
+    },
+    {
+      icon: '📋',
+      title: 'טופס 17-ג נדרש',
+      text: 'על פי תקנון משרד המשפטים סעיף 17-ג, כל העברה לאסיר מחייבת אישור בכתב מסוהרת ראשית.<br/>לא ידוע לנו שיש לך אישור כזה.'
+    },
+    {
+      icon: '📱',
+      title: 'הודעה נשלחה',
+      text: 'שלחנו הודעת ווטסאפ לאנשי הקשר שלך ולשלושה גורמים לא מזוהים שאתה מנסה להעביר כסף לאסיר.<br/>הם כנראה בדרך.'
+    },
+    {
+      icon: '🔍',
+      title: 'בדיקת רקע בתהליך',
+      text: 'אנחנו כרגע בודקים את הרקע שלך.<br/>זה אמור לקחת רגע.<br/>(זה לוקח קצת יותר מרגע.)<br/>נמשיך כשנסיים.'
+    },
+    {
+      icon: '💸',
+      title: 'האם ידעת?',
+      text: `עד כה הועברו לאסירים בישראל ₪0 דרך צ'יקי-קנטיקי.<br/>אתה עומד להיות הראשון.<br/>זה מפחיד קצת.`
+    },
+    {
+      icon: '🤝',
+      title: 'הסכמה לתנאים',
+      text: 'בהמשך מילוי הטופס אתה מסכים לתנאי השימוש של צ\'יקי-קנטיקי (127 עמודים, זמינים לעיון בסניף הראשי, אין סניף ראשי).'
+    },
+  ]
+  const w = warnings[_chikiWarnIdx % warnings.length]
+  _chikiWarnIdx++
+  return w
+}
+
+function chikiPopupHTML() {
+  const w = _getChikiWarning()
   return `
     <div class="chiki-popup-overlay" id="chiki-popup" onclick="closeChikiPopup()">
       <div class="chiki-popup" onclick="event.stopPropagation()">
-        <div class="chiki-popup-icon">⚠️</div>
-        <h3 class="chiki-popup-title">רגע לפני שממשיכים...</h3>
-        <p class="chiki-popup-text">
-          האם אתה בטוח שאתה רוצה להמשיך?<br/><br/>
-          לידיעתך, <strong>${esc(p.name)}</strong> ${esc(p.accusation)}.
-        </p>
+        <div class="chiki-popup-icon">${w.icon}</div>
+        <h3 class="chiki-popup-title">${w.title}</h3>
+        <p class="chiki-popup-text">${w.text}</p>
         <div class="chiki-popup-btns">
           <button class="chiki-popup-continue" onclick="closeChikiPopup()">המשך בכל זאת 😤</button>
           <button class="chiki-popup-cancel" onclick="chikiGoStep(1); closeChikiPopup()">בטל, חשבתי שוב 😅</button>
@@ -330,8 +373,7 @@ function chikiPopupHTML() {
 }
 
 function showChikiPopup() {
-  if (chikiState.popupShown) return
-  chikiState.popupShown = true
+  if (document.getElementById('chiki-popup')) return  // כבר פתוח
   document.body.insertAdjacentHTML('beforeend', chikiPopupHTML())
 }
 
@@ -339,12 +381,37 @@ function closeChikiPopup() {
   document.getElementById('chiki-popup')?.remove()
 }
 
+function chikiBlockedPopupHTML(p) {
+  return `
+    <div class="chiki-popup-overlay chiki-blocked-overlay" id="chiki-popup" onclick="closeChikiPopup()">
+      <div class="chiki-popup chiki-blocked-popup" onclick="event.stopPropagation()">
+        <div class="chiki-blocked-sirens">🚨 🚨 🚨</div>
+        <div class="chiki-blocked-code">[ SYSTEM ALERT — ERROR CODE: GA-7734 ]</div>
+        <h3 class="chiki-popup-title chiki-blocked-title">גישה נדחתה</h3>
+        <p class="chiki-popup-text chiki-blocked-text">
+          <strong>⛔ המידע הקשור ל${esc(p.name)} מסווג ברמה 7.</strong><br/><br/>
+          ניסיון הגישה שלך <strong>תועד, צולם, ושודר</strong> בשידור חי לגורמים הרלוונטיים.<br/><br/>
+          מומלץ לסגור את הדפדפן, לנתק את הרשת, ולנסות לחיות את החיים כרגיל.<br/><br/>
+          <small>בכל מקרה, כל אסיר אחר יעבוד ללא בעיה. באחריות.</small>
+        </p>
+        <div class="chiki-popup-btns">
+          <button class="chiki-popup-cancel chiki-blocked-btn" onclick="closeChikiPopup()">הבנתי. בוחר אחר. 🏃💨</button>
+        </div>
+      </div>
+    </div>`
+}
+
 // ============================================================
 // פעולות
 // ============================================================
 
 function chikiPickPrisoner(name) {
-  chikiState.prisoner = PRISONERS.find(p => p.name === name) || null
+  const found = PRISONERS.find(p => p.name === name) || null
+  if (found && found.blocked) {
+    document.body.insertAdjacentHTML('beforeend', chikiBlockedPopupHTML(found))
+    return
+  }
+  chikiState.prisoner = found
   if (chikiState.prisoner) {
     chikiState.step = 2
     updateChikiContent()
@@ -376,7 +443,6 @@ function chikiConfirmCustom() {
 
 function chikiGoStep(step) {
   chikiState.step = step
-  if (step < 3) chikiState.popupShown = false
   updateChikiContent()
 }
 
@@ -423,9 +489,9 @@ function initChikiListeners() {
     inp.focus()
   }
 
-  // שלב 3 — פופאפ בפוקוס ראשון בלבד
+  // שלב 3 — פופאפ בכל פוקוס
   document.querySelectorAll('.chiki-pf').forEach(f => {
-    f.addEventListener('focus', showChikiPopup, { once: true })
+    f.addEventListener('focus', showChikiPopup)
   })
 }
 
