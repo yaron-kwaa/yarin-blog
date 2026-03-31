@@ -110,7 +110,7 @@ const _POST_PUB = {
   'toxic-fish-akko':'2026-03-25T09:00',
   'alberto-kohlrabi':'2026-03-27T08:00',
   'alberto-shopping-list':'2026-03-29T07:00',
-  'dance-retreat-pesach':'2026-03-31T09:00'
+  'dance-retreat-pesach':'2026-03-28T09:00'
 }
 const _AUT = [
   'עם ישראל','רק ביבי','פלפל מתוק','אוהב את המדינה','ימין חזק','שמאל מתון',
