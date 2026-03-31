@@ -666,7 +666,12 @@ function renderPost(slug) {
 
   document.title = post.title + ' — הבלוג של ירין'
 
-  const paragraphs = post.content.map(p => `<p class="post-content__para">${esc(p)}</p>`).join('')
+  const paragraphs = post.content.map(p => {
+    if (p === '___ANIMATION___') {
+      return `<div style="margin:2rem 0;border-radius:14px;overflow:hidden;background:#111;box-shadow:0 4px 24px rgba(0,0,0,.4);"><canvas id="dance-canvas" style="width:100%;display:block;"></canvas></div>`
+    }
+    return `<p class="post-content__para">${esc(p)}</p>`
+  }).join('')
 
   const html = `
     <!-- כותרת -->
@@ -728,6 +733,11 @@ function renderPost(slug) {
 
   document.getElementById('main-content').innerHTML = html
   window.scrollTo(0, 0)
+
+  // אנימציית canvas לפוסטים מיוחדים
+  if (post.animationId === 'dance' && typeof initDanceAnimation === 'function') {
+    setTimeout(initDanceAnimation, 60)
+  }
 
   // הכנת לייטבוקס
   lightboxImages = post.images || []
