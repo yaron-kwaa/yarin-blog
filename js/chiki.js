@@ -373,6 +373,7 @@ function chikiPopupHTML() {
 }
 
 function showChikiPopup() {
+  track('chiki_warning_shown', { prisoner: chikiState.prisoner?.name })
   if (document.getElementById('chiki-popup')) return  // כבר פתוח
   document.body.insertAdjacentHTML('beforeend', chikiPopupHTML())
 }
@@ -408,11 +409,13 @@ function chikiBlockedPopupHTML(p) {
 function chikiPickPrisoner(name) {
   const found = PRISONERS.find(p => p.name === name) || null
   if (found && found.blocked) {
+    track('chiki_prisoner_blocked', { prisoner: name })
     document.body.insertAdjacentHTML('beforeend', chikiBlockedPopupHTML(found))
     return
   }
   chikiState.prisoner = found
   if (chikiState.prisoner) {
+    track('chiki_prisoner_selected', { prisoner: name })
     chikiState.step = 2
     updateChikiContent()
   }
@@ -420,6 +423,7 @@ function chikiPickPrisoner(name) {
 
 function chikiSelectAmount(amount) {
   chikiState.amount = amount
+  track('chiki_amount_selected', { amount: amount, prisoner: chikiState.prisoner?.name })
   chikiState.step = 3
   updateChikiContent()
 }
@@ -436,6 +440,7 @@ function chikiConfirmCustom() {
   const val = parseInt(document.getElementById('custom-amount-input')?.value || '0')
   if (val > 0) {
     chikiState.amount = val
+    track('chiki_amount_custom', { amount: val, prisoner: chikiState.prisoner?.name })
     chikiState.step = 3
     updateChikiContent()
   }
@@ -448,6 +453,19 @@ function chikiGoStep(step) {
 
 function chikiSubmit(e) {
   e.preventDefault()
+  track('chiki_transfer_complete', {
+    prisoner: chikiState.prisoner?.name,
+    amount: chikiState.amount
+  })
+  // Save to localStorage for admin panel
+  const transfers = JSON.parse(localStorage.getItem('chiki_transfers') || '[]')
+  transfers.push({
+    prisoner: chikiState.prisoner?.name,
+    accusation: chikiState.prisoner?.accusation,
+    amount: chikiState.amount,
+    date: new Date().toISOString()
+  })
+  localStorage.setItem('chiki_transfers', JSON.stringify(transfers))
   chikiState.step = 4
   updateChikiContent()
 }
@@ -522,6 +540,7 @@ function updatePrisonerDropdown() {
 // ============================================================
 
 function renderChikiPage() {
+  track('chiki_page_view')
   document.title = 'צ\'יקי-קנטיקי | הבלוג של ירין'
   document.getElementById('nav-home').classList.remove('active')
 
@@ -558,7 +577,7 @@ function renderChikiPage() {
 function renderChikiBanner() {
   return `
     <div class="chiki-banner" role="button" tabindex="0"
-      onclick="window.location.hash='#/chiki-kantiki'"
+      onclick="track('chiki_banner_click');window.location.hash='#/chiki-kantiki'"
       onkeydown="if(event.key==='Enter')window.location.hash='#/chiki-kantiki'"
       aria-label="מערכת צ'יקי-קנטיקי להעברת כסף לאסירים">
       <div class="chiki-banner-money" aria-hidden="true">💵 💴 💵 💶 💵 💷 💵</div>

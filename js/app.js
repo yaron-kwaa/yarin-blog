@@ -1168,6 +1168,9 @@ function openAdminPanel() {
       </div>`
   })
 
+  // Collect chiki transfers
+  const chikiTransfers = JSON.parse(localStorage.getItem('chiki_transfers') || '[]')
+
   // Collect emails
   const emails = JSON.parse(localStorage.getItem('kolorabi_emails') || '[]')
   const emailsHTML = emails.length > 0
@@ -1211,6 +1214,14 @@ function openAdminPanel() {
             <span class="admin__stat-label">📩 אימיילים</span>
           </div>
           <div class="admin__stat-card">
+            <span class="admin__stat-num">${chikiTransfers.length}</span>
+            <span class="admin__stat-label">🏛️ העברות לאסירים</span>
+          </div>
+          <div class="admin__stat-card">
+            <span class="admin__stat-num">${chikiTransfers.reduce((s,t)=>s+(t.amount||0),0)} ₪</span>
+            <span class="admin__stat-label">💰 סה״כ הועבר</span>
+          </div>
+          <div class="admin__stat-card">
             <span class="admin__stat-num">${totalVisits}</span>
             <span class="admin__stat-label">👁️ צפיות</span>
           </div>
@@ -1224,6 +1235,22 @@ function openAdminPanel() {
           <h2 class="admin__section-title">👁️ ביקורים באתר</h2>
           <p class="admin__note">סה״כ ${totalVisits} צפיות ב-${visitDays.length} ימים (מבוסס על דפדפן מקומי)</p>
           ${visitsHTML}
+        </div>
+
+        <div class="admin__section">
+          <h2 class="admin__section-title">🏛️ צ׳יקי-קנטיקי — העברות לאסירים</h2>
+          <p class="admin__note">${chikiTransfers.length} העברות, סה״כ ${chikiTransfers.reduce((s,t)=>s+(t.amount||0),0)} ₪</p>
+          ${chikiTransfers.length > 0
+            ? `<table class="admin__table">
+                <thead><tr><th>אסיר</th><th>סכום</th><th>תאריך</th><th>עבירה</th></tr></thead>
+                <tbody>${chikiTransfers.slice().reverse().map(t => `<tr>
+                  <td>${esc(t.prisoner || '—')}</td>
+                  <td><strong>${t.amount} ₪</strong></td>
+                  <td>${new Date(t.date).toLocaleString('he-IL')}</td>
+                  <td class="admin__comment-text">${esc((t.accusation || '—')).slice(0, 60)}</td>
+                </tr>`).join('')}</tbody>
+               </table>`
+            : '<p class="admin__empty">אין העברות עדיין</p>'}
         </div>
 
         <div class="admin__section">
@@ -1243,6 +1270,7 @@ function openAdminPanel() {
           <div class="admin__actions">
             <button class="admin__action-btn admin__action-btn--danger" id="admin-clear-comments">מחק את כל התגובות</button>
             <button class="admin__action-btn admin__action-btn--danger" id="admin-clear-emails">מחק את כל האימיילים</button>
+            <button class="admin__action-btn admin__action-btn--danger" id="admin-clear-chiki">מחק העברות אסירים</button>
             <button class="admin__action-btn" id="admin-clear-visits">אפס נתוני ביקורים</button>
             <button class="admin__action-btn" id="admin-export">📋 ייצא הכל (JSON)</button>
           </div>
@@ -1267,6 +1295,12 @@ function openAdminPanel() {
       openAdminPanel()
     }
   }
+  document.getElementById('admin-clear-chiki').onclick = () => {
+    if (confirm('בטוח? זה ימחק את כל העברות האסירים!!!')) {
+      localStorage.removeItem('chiki_transfers')
+      openAdminPanel()
+    }
+  }
   document.getElementById('admin-clear-visits').onclick = () => {
     if (confirm('בטוח? זה יאפס את נתוני הביקורים!!!')) {
       localStorage.removeItem('site_visits')
@@ -1274,7 +1308,7 @@ function openAdminPanel() {
     }
   }
   document.getElementById('admin-export').onclick = () => {
-    const data = { comments: {}, emails: emails, visits: visits }
+    const data = { comments: {}, emails: emails, chikiTransfers: chikiTransfers, visits: visits }
     POSTS.forEach(p => { data.comments[p.slug] = getComments(p.slug) })
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const a = document.createElement('a')
