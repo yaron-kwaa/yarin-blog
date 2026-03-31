@@ -109,7 +109,8 @@ const _POST_PUB = {
   'kotel-hummus-arafat':'2026-03-26T10:00',
   'toxic-fish-akko':'2026-03-25T09:00',
   'alberto-kohlrabi':'2026-03-27T08:00',
-  'alberto-shopping-list':'2026-03-29T07:00'
+  'alberto-shopping-list':'2026-03-29T07:00',
+  'dance-retreat-pesach':'2026-03-31T09:00'
 }
 const _AUT = [
   'עם ישראל','רק ביבי','פלפל מתוק','אוהב את המדינה','ימין חזק','שמאל מתון',
@@ -160,10 +161,12 @@ function _getPubDate(slug) {
   try {
     const saved = JSON.parse(localStorage.getItem('_auto_dates') || '{}')
     if (saved[slug]) return saved[slug]
-    saved[slug] = new Date().toISOString()
+    // For unknown posts, set pub date 3 days ago so comments generate immediately
+    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 3600000).toISOString()
+    saved[slug] = threeDaysAgo
     localStorage.setItem('_auto_dates', JSON.stringify(saved))
     return saved[slug]
-  } catch(e) { return new Date().toISOString() }
+  } catch(e) { return new Date(Date.now() - 3 * 24 * 3600000).toISOString() }
 }
 
 function _getQuotes(post) {
