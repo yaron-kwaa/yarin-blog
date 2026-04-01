@@ -117,6 +117,9 @@ const _POST_PUB = {
   'passover-potato-secret':'2026-03-30T10:00',
   'theater-karov':'2026-03-31T09:00',
   'matza-shalom-experiment':'2026-04-01T09:00',
+  'pesach-cleaning-lazy':'2026-04-01T11:00',
+  'seder-questions-kids':'2026-04-01T13:00',
+  'pesach-market-prices':'2026-04-01T15:00',
 }
 
 // ---- SEO / Meta update ----
@@ -211,80 +214,87 @@ function _getQuotes(post) {
   return parts.length > 0 ? parts : [post.title]
 }
 
-// Combinatorial comment generator — every comment is unique
+// Combinatorial comment generator — sounds like real readers of Yarin's blog
 function _genText(post, rng) {
   const quotes = _getQuotes(post)
   const q1 = quotes[Math.floor(rng() * quotes.length)]
   const q2 = quotes[Math.floor(rng() * quotes.length)]
-  const sq = q1.length > 45 ? q1.slice(0, 45) + '...' : q1
-  const sq2 = q2.length > 40 ? q2.slice(0, 40) + '...' : q2
+  const sq = q1.length > 40 ? q1.slice(0, 40) + '...' : q1
+  const sq2 = q2.length > 35 ? q2.slice(0, 35) + '...' : q2
   const au = post.author || 'ירין'
-  const title = post.title
 
-  // Building blocks — openers, middles, closers
+  // Openers — specific, human, Israeli
   const openers = [
-    'וואו,','אחלה,','מדהים,','רגע,','אוקיי אז','שמעו,','חברים,',
-    'אני חייב להגיד ש','לא יאמן,','בואו נדבר על זה —','תשמעו,',
-    'קראתי את "'+title+'" ו','אחרי שקראתי את הכל,','בהתחלה חשבתי ש',
-    'הגעתי לפה במקרה ו','מישהו שלח לי את הקישור ו','נתקלתי בכתבה הזאת ו',
-    'אז ככה,','פשוט,','בקיצור,','אני ממש','לא מאמין ש','אם אני כנה,',
-    'הפעם חייבים להודות ש','כל פעם שאני קורא פה',''+au+',',
+    'אחי,','רגע רגע רגע —','תקשיבו,','לא, ממש לא,','אוקיי אז',
+    'הייתי בדיוק שם ו','קיבלתי את זה מהאחות שלי ו','כן, ממש כן,',
+    'בתור מישהו שמכיר את '+au+',','שלחו לי את זה בוואטסאפ ו',
+    'בהתחלה לא הבנתי אבל אז,','כשקראתי "'+sq+'" פשוט,',
+    'חכו חכו חכו,','לא ציפיתי שזה יגע בי אבל,',
+    'שאלתי את '+au+' בדיוק את זה פעם ו','בן אדם, פשוט בן אדם,',
+    'עוד כתבה שאני קורא בשירותים. מצטער. אבל',
+    'שלחו לי את זה ב-3 בלילה ו','ירין ממש,',
+    'לא אמרתי כלום כשקראתי. פשוט ישבתי. ואז',
   ]
+
+  // Middles — personal, specific, with post quotes
   const middles = [
-    'הכתבה הזאת פשוט מדהימה','הקטע על "'+sq+'" ממש דיבר אליי',
-    'כל מילה פה נכונה','זה בדיוק מה שחשבתי','אני לא מסכים עם הכל',
-    '"'+sq+'" — זה כל כך מדויק','אני מזדהה עם כל שורה',
-    'יש פה הגזמה קלה אבל בסדר','הצחקתם אותי עם "'+sq2+'"',
-    'זה מזכיר לי משהו שקרה לי','אני ממש לא בטוח לגבי "'+sq+'"',
-    'הייתי שם בעצמי ואני מאשר','חבר שלי סיפר בדיוק את זה',
-    'אף אחד לא כותב ככה היום','זה קורע אותי מצחוק',
-    'אני חולק לגמרי על "'+sq2+'"','המון אמת בכתבה הזאת',
-    'זה גורם לי לחשוב מחדש','קראתי את זה פעמיים','יש פה תובנות רציניות',
-    'שיתפתי את זה עם כולם','אני לא מפסיק לדבר על "'+sq+'"',
-    'הנושא הזה ממש חשוב',''+au+' פשוט יודע לכתוב','באמת נגע בי',
-    'זה הדבר הכי אמיתי שקראתי היום','פשוט בול','אני חושב שחסר פה משהו',
-    'הכתבה חזקה אבל "'+sq2+'" זה קצת מוגזם',''+au+' עשה עבודה מעולה',
+    '"'+sq+'" — זה בדיוק מה שאמרתי לאמא שלי אתמול',
+    'הלכתי לשם בגלל הכתבה הזאת. לא מצטער',
+    'ירין כותב ככה שנדמה שהוא מתאר את הבית שלי',
+    '"'+sq2+'" — הצחקת אותי בקפה ועכשיו החולצה רטובה',
+    'הסיפור על '+sq+' הכה אותי בפנים בלי אזהרה',
+    'כבר שלחתי לשלושה אנשים. אחד לא ענה עדיין',
+    'הייתי בדיוק באותה מצב ו-'+au+' תיאר את זה מילה במילה',
+    'קראתי פעמיים. ואז שלישית. לא עזר. עדיין צוחק',
+    'יש פה רגע ש"'+sq+'" וזה הרגע הכי אמיתי שקראתי השנה',
+    'הסוף של הכתבה הזאת — לא יאמן. ממש לא יאמן',
+    ''+au+' כותב ככה שאתה מרגיש שאתה שם',
+    '"'+sq+'" — אני אמרתי ככה בדיוק לחבר שלי ב-2023',
+    'שיניתי את דעתי על '+sq.split(' ').slice(0,3).join(' ')+' בגלל הכתבה הזאת',
+    'התחלתי לקרוא ב-11. גמרתי ב-11:02. עכשיו מה',
+    'כמה פעמים ירין כותב משהו שאני חשבתי עליו אבל לא ידעתי לנסח',
   ]
+
+  // Closers — personal, not generic
   const closers = [
-    '!!!','— ממליץ לכולם','תשתפו את זה','אני אחזור לקרוא שוב',
-    'מחכה לכתבה הבאה!!!','שלחו עוד ככה','כל הכבוד '+au,
-    'הלוואי שהיו עוד בלוגים כאלה','חח','פשוט תקראו',
-    'עשיתם לי את היום','מישהו עוד מרגיש ככה?','❤️',
-    'אבל באמת, תחשבו על זה','סוף דבר — שווה','10/10',
-    'אני פשוט...','מקווה שימשיכו לכתוב','(מדבר מניסיון)',
-    'תנסו בעצמכם','אין ספק','פשוט כן','— '+au+' תמשיך!!!',
-    'יאללה עוד כתבה','#הבלוגשלירין','ואני אומר את זה בתור מישהו שקורא הרבה',
-    ', ואני לא אומר את זה סתם','ומי שלא מסכים מוזמן להגיב',
+    '!!!','תמשיך ככה!!!','— שיתפתי עם כולם','ובכלל','הבלוג הזה מרפא',
+    '(מה הכתבה הבאה???)','— '+au+' תמשיך!!!','חח לא נגמר',
+    'כל הכבוד אחי','ותודה','— עשית לי את היום ממש',
+    'מחכה לעוד','וזה לא שאני קורא הרבה בלוגים','5/5 ❤️',
+    '— אמרתי לחברה שלי ועכשיו היא גם קוראת',
+    'ומי שלא קרא — עוף לקרוא', '— נשמה!!!',
+    'שבת שלום מהכנסת (לא, לא מהכנסת, מהמיטה)',
+    '(בתור מישהו שאוהב חומוס — מאשר)',
   ]
-  const emojis = ['😂','🔥','❤️','👏','💯','🤔','😍','🙌','👀','✨','💪','🎯','😱','🤣','👍']
+  const emojis = ['😂','🔥','❤️','👏','💯','🙌','✨','😱','🤣','🫶','😭 (מדמעות שמחה)','אחי!!!']
 
   const opener = openers[Math.floor(rng() * openers.length)]
   const middle = middles[Math.floor(rng() * middles.length)]
   const closer = closers[Math.floor(rng() * closers.length)]
-  const emoji = rng() < 0.4 ? ' ' + emojis[Math.floor(rng() * emojis.length)] : ''
+  const emoji = rng() < 0.35 ? ' ' + emojis[Math.floor(rng() * emojis.length)] : ''
 
-  // Different structures for variety
-  const structure = Math.floor(rng() * 6)
+  const structure = Math.floor(rng() * 7)
   if (structure === 0) return opener + ' ' + middle + ' ' + closer + emoji
   if (structure === 1) return middle + '. ' + closer + emoji
   if (structure === 2) return opener + ' ' + middle + emoji
   if (structure === 3) return '"' + sq + '" — ' + middle + '. ' + closer + emoji
-  if (structure === 4) return opener + ' ' + middle + '. ' + middle.split(' ').slice(0,4).join(' ') + '...' + emoji
-  return middle + emoji
+  if (structure === 4) return opener + ' ' + middle + '. לא ידעתי שצריך לקרוא את זה היום' + emoji
+  if (structure === 5) return middle + '. שלחתי לאמא. היא שאלה "מי זה '+au+'?" עניתי "חבר"' + emoji
+  return opener + ' ' + middle + emoji
 }
 
-// Combinatorial reply generator
+// Combinatorial reply generator — specific, not generic
 function _genReply(rng) {
-  const intros = ['','הממ, ','נכון, ','לא, ','כן! ','בול, ','חח, ','וואלה ','אכן, ','סבבה, ','רגע, ']
-  const cores = [
-    'מסכים לגמרי','בדיוק מה שחשבתי','לא נכון','אחלה תגובה','ממש לא',
-    'צודק','תודה','אתה צודק','לא מסכים','נכון מאוד','יפה נאמר',
-    'הצחקת אותי','דווקא יש בזה משהו','גם חשבתי ככה','כל הכבוד',
-    'חבל שלא חשבתי על זה','תגובה מצוינת','לא רלוונטי','שטויות',
-    'מעניין','100%','בדיוק','אתה מוזמן לכתוב בעצמך','יש לי דעה אחרת',
+  const replies = [
+    'וואי כן, בדיוק חשבתי ככה!!!','לא, ממש לא, תקרא שוב','הממ... יש בזה משהו',
+    'חח בדיוק אמרתי את זה לאחות שלי','מסכים 100%. אבל נסה לשכנע את אמא שלי',
+    'תגובה מצוינת. 10/10 ללא שיפוטיות','לא נכון. נכון? לא יודע',
+    'אחי כן!!!','וואלה לא חשבתי על זה ככה','אבל מה עם "'+rng().toString(36).slice(2,6)+'"?',
+    'צודק. ולכן אני כבר שם.','הייתי שם אתמול. מאשר','חח לא נגמר',
+    'סבבה אבל בא נשמע את הצד השני','זה עניין אחר לגמרי — שאלה מצוינת בכל זאת',
+    'לא הבנתי אבל גם הסכמתי','נכון מאוד. קפה?',
   ]
-  const endings = ['','!!!','...','👍','😂',' לגמרי',' אבל בסדר',' חח',' 🔥',' בול']
-  return intros[Math.floor(rng()*intros.length)] + cores[Math.floor(rng()*cores.length)] + endings[Math.floor(rng()*endings.length)]
+  return replies[Math.floor(rng() * replies.length)]
 }
 
 function _autoPopulate() {
@@ -480,9 +490,34 @@ function renderGallery(images) {
     </section>`
 }
 
+// ---- Share bar ----
+function renderShareBar(post) {
+  const url = encodeURIComponent(_BASE_URL + '/#/post/' + post.slug)
+  const text = encodeURIComponent(post.title + ' — הבלוג של ירין')
+  return `
+    <div style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7);border:2px solid #86EFAC;border-radius:16px;padding:20px;text-align:center;margin:2rem 0;">
+      <p style="font-weight:800;font-size:1rem;color:#166534;margin:0 0 12px;">👍 אהבתם? שתפו את הפוסט!</p>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+        <a href="https://wa.me/?text=${text}%0A${url}" target="_blank" rel="noopener"
+           onclick="track('post_share_whatsapp',{post_slug:'${esc(post.slug)}'})"
+           style="background:#25D366;color:#fff;font-weight:700;padding:10px 20px;border-radius:9999px;text-decoration:none;font-size:.9rem;">💬 שלח בוואטסאפ</a>
+        <button onclick="navigator.clipboard.writeText('${_BASE_URL}/#/post/${esc(post.slug)}').then(()=>{this.textContent='✅ הועתק!';setTimeout(()=>this.textContent='🔗 העתק לינק',2000)});track('post_share_copy',{post_slug:'${esc(post.slug)}'})"
+           style="background:#6366F1;color:#fff;font-weight:700;padding:10px 20px;border-radius:9999px;border:none;cursor:pointer;font-size:.9rem;">🔗 העתק לינק</button>
+      </div>
+    </div>`
+}
+
 // ---- HTML פוסטים קשורים ----
 function renderRelated(post) {
-  const related = POSTS.filter(p => p.category === post.category && p.slug !== post.slug).slice(0, 3)
+  // Try tag match first, then category
+  const postTags = post.tags || []
+  let related = postTags.length
+    ? POSTS.filter(p => p.slug !== post.slug && (p.tags || []).some(t => postTags.includes(t))).slice(0, 3)
+    : []
+  if (related.length < 3) {
+    const byCat = POSTS.filter(p => p.category === post.category && p.slug !== post.slug && !related.find(r => r.slug === p.slug))
+    related = [...related, ...byCat].slice(0, 3)
+  }
   if (!related.length) return ''
   const cards = related.map(rp => `
     <div class="related-card related-card--${esc(rp.colorClass)}" onclick="navigate('${esc(rp.slug)}')" role="button" tabindex="0" aria-label="עבור לפוסט: ${esc(rp.title)}">
@@ -499,6 +534,41 @@ function renderRelated(post) {
       <div class="container">
         <h2 class="related-posts__title">🔥 עוד פוסטים שתאהבו!!!</h2>
         <div class="related-posts__grid">${cards}</div>
+      </div>
+    </section>`
+}
+
+// ============================================================
+// פסח האב — סקשן עונתי
+// ============================================================
+
+function renderPesachHub() {
+  const pesachPosts = POSTS.filter(p => (p.tags || []).includes('פסח')).slice(0, 6)
+  if (!pesachPosts.length) return ''
+
+  const cards = pesachPosts.map(p => `
+    <button class="pesach-hub__card pesach-hub__card--${esc(p.colorClass)}"
+      onclick="navigate('${esc(p.slug)}');track('pesach_hub_click',{slug:'${esc(p.slug)}'})"
+      aria-label="${esc(p.title)}">
+      <div class="pesach-hub__card-img">
+        <img src="${esc(p.mainImage.src)}" alt="${esc(p.mainImage.alt)}" loading="lazy" />
+      </div>
+      <div class="pesach-hub__card-body">
+        <span class="pesach-hub__card-cat">${esc(p.categoryEmoji)} ${esc(p.category)}</span>
+        <h3 class="pesach-hub__card-title">${esc(p.title)}</h3>
+        <p class="pesach-hub__card-teaser">${esc(p.teaser.slice(0, 80))}...</p>
+      </div>
+    </button>`).join('')
+
+  return `
+    <section class="pesach-hub" aria-label="מדריך פסח של ירין">
+      <div class="container">
+        <div class="pesach-hub__header">
+          <div class="pesach-hub__badge">🫓 פסח 2026</div>
+          <h2 class="pesach-hub__title">כל מה שירין כתב על פסח — במקום אחד</h2>
+          <p class="pesach-hub__sub">ניקיון, שאלות לסדר, שווקים, מצות שלום, ריטריטים, ועוד דברים שאף אחד לא ציפה</p>
+        </div>
+        <div class="pesach-hub__grid">${cards}</div>
       </div>
     </section>`
 }
@@ -643,6 +713,9 @@ function renderHome() {
     <!-- באנר צ'יקי-קנטיקי -->
     ${renderChikiBanner()}
 
+    <!-- פסח האב -->
+    ${renderPesachHub()}
+
     <!-- פוסטים -->
     <main id="posts" class="posts-section" aria-label="כל הפוסטים">
       <div class="container">
@@ -753,9 +826,34 @@ function renderPost(slug) {
       inLanguage: 'he',
       mainEntityOfPage: { '@type': 'WebPage', '@id': _BASE_URL + '/#/post/' + post.slug },
       isPartOf: { '@type': 'Blog', name: 'הבלוג של ירין', url: _BASE_URL + '/' },
-      keywords: (post.category || '') + ', ' + (post.title.split(' ').slice(0, 5).join(', '))
+      keywords: (post.category || '') + ', ' + (post.title.split(' ').slice(0, 5).join(', ')),
+      ...(post.faq ? {
+        mainEntity: post.faq.map(f => ({
+          '@type': 'Question', name: f.q,
+          acceptedAnswer: { '@type': 'Answer', text: f.a }
+        }))
+      } : {})
     }
   })
+
+  // inject FAQ schema separately for Google rich results
+  if (post.faq && post.faq.length) {
+    const faqEl = document.createElement('script')
+    faqEl.type = 'application/ld+json'
+    faqEl.id = 'faq-json-ld'
+    faqEl.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: post.faq.map(f => ({
+        '@type': 'Question', name: f.q,
+        acceptedAnswer: { '@type': 'Answer', text: f.a }
+      }))
+    })
+    document.getElementById('faq-json-ld')?.remove()
+    document.head.appendChild(faqEl)
+  } else {
+    document.getElementById('faq-json-ld')?.remove()
+  }
 
   const paragraphs = post.content.map(p => {
     if (p === '___ANIMATION___') {
@@ -805,6 +903,7 @@ function renderPost(slug) {
     <div class="post-content">
       <div class="container">
         <div class="post-content__body">${paragraphs}</div>
+        ${renderShareBar(post)}
         ${renderGallery(post.images)}
         <div class="post-nav">
           <button class="post-nav__btn" onclick="navigate(null)">
