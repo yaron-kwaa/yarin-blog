@@ -68,7 +68,7 @@ let _matzaAnimFrame = null
 
 // ---- Canvas ----
 
-function initMatzaCanvas() {
+function initMatzaCanvas(viewOnly) {
   _matzaCanvas = document.getElementById('matza-canvas')
   _matzaCtx = _matzaCanvas.getContext('2d')
   _matzaVideo = document.getElementById('matza-video')
@@ -86,12 +86,14 @@ function initMatzaCanvas() {
     if (!_matzaAnimFrame) drawMatzaFrame()
   })
 
-  // Touch/mouse events for emoji dragging
-  _matzaCanvas.addEventListener('pointerdown', onMatzaPointerDown)
-  _matzaCanvas.addEventListener('pointermove', onMatzaPointerMove)
-  _matzaCanvas.addEventListener('pointerup', onMatzaPointerUp)
-  _matzaCanvas.addEventListener('dblclick', onMatzaDblClick)
-  _matzaCanvas.style.touchAction = 'none'
+  // Only enable drag in edit mode
+  if (!viewOnly) {
+    _matzaCanvas.addEventListener('pointerdown', onMatzaPointerDown)
+    _matzaCanvas.addEventListener('pointermove', onMatzaPointerMove)
+    _matzaCanvas.addEventListener('pointerup', onMatzaPointerUp)
+    _matzaCanvas.addEventListener('dblclick', onMatzaDblClick)
+    _matzaCanvas.style.touchAction = 'none'
+  }
 
   _matzaVideo.load()
 }
@@ -312,7 +314,13 @@ function onMatzaDblClick(e) {
 
 // ---- Emoji picker ----
 
+let _matzaHintHidden = false
 function matzaAddEmoji(emoji) {
+  if (!_matzaHintHidden) {
+    _matzaHintHidden = true
+    const hint = document.getElementById('matza-hint')
+    if (hint) hint.style.display = 'none'
+  }
   matzaState.emojis.push({
     emoji,
     x: 0.3 + Math.random() * 0.4,
@@ -529,11 +537,19 @@ function matzaEncodeTexts() {
   ).join(';')
 }
 
+function matzaSmartDecode(str) {
+  // Detect still-encoded text from old double-encoded links (%D7%99... pattern)
+  if (/%[0-9A-Fa-f]{2}/.test(str)) {
+    try { return decodeURIComponent(str) } catch (e) { /* malformed, use as-is */ }
+  }
+  return str
+}
+
 function matzaDecodeTexts(str) {
   return str.split(';').map(s => {
     const [text, lang, x, y, size, color] = s.split('|')
     return {
-      text: text || '',
+      text: matzaSmartDecode(text || ''),
       lang: lang || 'he',
       x: parseFloat(x) || 0.5,
       y: parseFloat(y) || 0.85,
@@ -575,7 +591,7 @@ function matzaParseParams() {
     // Backwards compat: old single-text format
     else if (params.get('t')) {
       matzaState.texts = [{
-        text: params.get('t'),
+        text: matzaSmartDecode(params.get('t')),
         lang: params.get('tl') || 'he',
         x: parseFloat(params.get('tx')) || 0.5,
         y: parseFloat(params.get('ty')) || 0.85,
@@ -782,17 +798,10 @@ function renderMatzaPage() {
     </div>`
 
   window.scrollTo(0, 0)
+  _matzaHintHidden = false
   initMatzaCanvas()
   renderMatzaPresets()
   renderMatzaTextList()
-
-  // Hide hint after first emoji add
-  const origAdd = matzaAddEmoji
-  matzaAddEmoji = function(emoji) {
-    const hint = document.getElementById('matza-hint')
-    if (hint) hint.style.display = 'none'
-    origAdd(emoji)
-  }
 }
 
 function renderMatzaViewPage() {
@@ -811,8 +820,8 @@ function renderMatzaViewPage() {
         </div>
       </header>
 
-      <div class="container" style="max-width:420px;margin:0 auto;padding:2rem 1rem;text-align:center;">
-        <div class="matza-canvas-wrap" style="margin:0 auto;">
+      <div class="container" style="max-width:100%;width:100%;padding:1.5rem 1rem;text-align:center;box-sizing:border-box;overflow:hidden;">
+        <div class="matza-canvas-wrap" style="margin:0 auto;max-width:360px;">
           <canvas id="matza-canvas" class="matza-canvas"></canvas>
           <video id="matza-video" src="${videoSrc}" muted loop playsinline preload="auto" style="display:none"></video>
         </div>
@@ -821,8 +830,8 @@ function renderMatzaViewPage() {
           `<p style="font-size:1.1rem;color:#92400E;font-weight:700;margin:.75rem 0 0;">״${t.text}״</p>`
         ).join('') : ''}
 
-        <div style="display:flex;flex-direction:column;gap:10px;margin-top:1.5rem;">
-          <button class="matza-action-btn matza-action-btn--record" onclick="matzaRecord()">🎬 הורד סרטון</button>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:1.5rem;max-width:360px;margin-left:auto;margin-right:auto;">
+          <button class="matza-action-btn matza-action-btn--record" id="matza-record-btn" onclick="matzaRecord()">🎬 הורד סרטון</button>
           <button class="matza-action-btn matza-action-btn--whatsapp" onclick="matzaShareWhatsApp()">💬 שתף בוואטסאפ</button>
           <a class="matza-action-btn" href="#/shalom-matza"
             style="background:linear-gradient(135deg,#F59E0B,#D97706);display:block;text-decoration:none;padding:14px 8px;border-radius:12px;font-size:1rem;font-weight:700;color:#fff;text-align:center;"
@@ -838,7 +847,7 @@ function renderMatzaViewPage() {
     </div>`
 
   window.scrollTo(0, 0)
-  initMatzaCanvas()
+  initMatzaCanvas(true)
 }
 
 function renderMatzaBanner() {
