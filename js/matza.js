@@ -514,8 +514,9 @@ function matzaDownloadImage() {
 
 function matzaEncodeTexts() {
   // Format: text|lang|x|y|size|color;text|lang|x|y|size|color
+  // No manual encoding — URLSearchParams handles it
   return matzaState.texts.map(t =>
-    encodeURIComponent(t.text) + '|' + t.lang + '|' + t.x.toFixed(2) + '|' + t.y.toFixed(2) + '|' + t.size + '|' + encodeURIComponent(t.color)
+    t.text + '|' + t.lang + '|' + t.x.toFixed(2) + '|' + t.y.toFixed(2) + '|' + t.size + '|' + t.color
   ).join(';')
 }
 
@@ -523,12 +524,12 @@ function matzaDecodeTexts(str) {
   return str.split(';').map(s => {
     const [text, lang, x, y, size, color] = s.split('|')
     return {
-      text: decodeURIComponent(text),
+      text: text || '',
       lang: lang || 'he',
       x: parseFloat(x) || 0.5,
       y: parseFloat(y) || 0.85,
       size: parseInt(size) || 28,
-      color: color ? decodeURIComponent(color) : '#FFFFFF',
+      color: color || '#FFFFFF',
     }
   }).filter(t => t.text)
 }
@@ -550,36 +551,41 @@ function matzaGenerateViewLink() {
 }
 
 function matzaParseParams() {
-  const hash = location.hash
-  const qIdx = hash.indexOf('?')
-  if (qIdx === -1) return false
-  const params = new URLSearchParams(hash.slice(qIdx + 1))
+  try {
+    const hash = location.hash
+    const qIdx = hash.indexOf('?')
+    if (qIdx === -1) return false
+    const params = new URLSearchParams(hash.slice(qIdx + 1))
 
-  if (params.get('v')) matzaState.videoId = params.get('v')
+    if (params.get('v')) matzaState.videoId = params.get('v')
 
-  // New multi-text format
-  if (params.get('txt')) {
-    matzaState.texts = matzaDecodeTexts(params.get('txt'))
-  }
-  // Backwards compat: old single-text format
-  else if (params.get('t')) {
-    matzaState.texts = [{
-      text: params.get('t'),
-      lang: params.get('tl') || 'he',
-      x: parseFloat(params.get('tx')) || 0.5,
-      y: parseFloat(params.get('ty')) || 0.85,
-      size: parseInt(params.get('ts')) || 28,
-      color: params.get('tc') || '#FFFFFF',
-    }]
-  }
+    // New multi-text format
+    if (params.get('txt')) {
+      matzaState.texts = matzaDecodeTexts(params.get('txt'))
+    }
+    // Backwards compat: old single-text format
+    else if (params.get('t')) {
+      matzaState.texts = [{
+        text: params.get('t'),
+        lang: params.get('tl') || 'he',
+        x: parseFloat(params.get('tx')) || 0.5,
+        y: parseFloat(params.get('ty')) || 0.85,
+        size: parseInt(params.get('ts')) || 28,
+        color: params.get('tc') || '#FFFFFF',
+      }]
+    }
 
-  if (params.get('e')) {
-    matzaState.emojis = params.get('e').split(';').map(s => {
-      const [emoji, x, y, size] = s.split(',')
-      return { emoji, x: parseFloat(x), y: parseFloat(y), size: parseInt(size) }
-    }).filter(e => e.emoji && !isNaN(e.x))
+    if (params.get('e')) {
+      matzaState.emojis = params.get('e').split(';').map(s => {
+        const [emoji, x, y, size] = s.split(',')
+        return { emoji, x: parseFloat(x), y: parseFloat(y), size: parseInt(size) }
+      }).filter(e => e.emoji && !isNaN(e.x))
+    }
+    return params.get('m') === 'view'
+  } catch (e) {
+    // Truncated or malformed URL — show view page gracefully
+    return location.hash.includes('m=view')
   }
-  return params.get('m') === 'view'
 }
 
 // ---- Save to localStorage for admin ----
