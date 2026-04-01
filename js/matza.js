@@ -4,6 +4,7 @@
 
 const MATZA_VIDEOS = [
   { id: 'matza-1', src: 'media/matza-1.mp4', label: 'מצה קלאסית' },
+  { id: 'matza-2', src: 'media/matza-2.mp4', label: 'מצה באביב' },
 ]
 
 const EMOJI_CATEGORIES = {
@@ -109,9 +110,21 @@ function drawMatzaFrame() {
   const w = _matzaCanvas.width
   const h = _matzaCanvas.height
 
-  // Draw video frame
+  // Draw video frame (cover mode — preserve aspect ratio, crop to fill)
   if (_matzaVideo && _matzaVideo.readyState >= 2) {
-    ctx.drawImage(_matzaVideo, 0, 0, w, h)
+    const vw = _matzaVideo.videoWidth
+    const vh = _matzaVideo.videoHeight
+    const canvasRatio = w / h
+    const videoRatio = vw / vh
+    let sx = 0, sy = 0, sw = vw, sh = vh
+    if (videoRatio > canvasRatio) {
+      sw = vh * canvasRatio
+      sx = (vw - sw) / 2
+    } else {
+      sh = vw / canvasRatio
+      sy = (vh - sh) / 2
+    }
+    ctx.drawImage(_matzaVideo, sx, sy, sw, sh, 0, 0, w, h)
   } else {
     ctx.fillStyle = '#F5E6C8'
     ctx.fillRect(0, 0, w, h)
@@ -139,8 +152,8 @@ function drawMatzaFrame() {
     ctx.textBaseline = 'middle'
     ctx.direction = isRtl ? 'rtl' : 'ltr'
 
-    const tx = w / 2
-    const ty = h * 0.85
+    const tx = matzaState.textPosition.x * w
+    const ty = matzaState.textPosition.y * h
 
     // Shadow/outline for readability
     ctx.strokeStyle = 'rgba(0,0,0,0.7)'
@@ -202,8 +215,20 @@ function hitTestEmoji(px, py) {
   return -1
 }
 
+function hitTestText(px, py) {
+  if (!matzaState.text) return false
+  const tp = matzaState.textPosition
+  const w = _matzaCanvas.width
+  const h = _matzaCanvas.height
+  const fontSize = matzaState.textSize * (w / 540)
+  const textW = Math.min(0.85, matzaState.text.length * fontSize * 0.6 / w)
+  const textH = fontSize * 1.5 / h
+  return Math.abs(px - tp.x) < Math.max(0.15, textW / 2) && Math.abs(py - tp.y) < Math.max(0.05, textH)
+}
+
 function onMatzaPointerDown(e) {
   const p = canvasCoords(e)
+  // Check emojis first (on top), then text
   const idx = hitTestEmoji(p.x, p.y)
   if (idx >= 0) {
     matzaState.dragging = idx
@@ -213,15 +238,28 @@ function onMatzaPointerDown(e) {
     }
     _matzaCanvas.setPointerCapture(e.pointerId)
     e.preventDefault()
+  } else if (hitTestText(p.x, p.y)) {
+    matzaState.dragging = 'text'
+    matzaState.dragOffset = {
+      x: p.x - matzaState.textPosition.x,
+      y: p.y - matzaState.textPosition.y,
+    }
+    _matzaCanvas.setPointerCapture(e.pointerId)
+    e.preventDefault()
   }
 }
 
 function onMatzaPointerMove(e) {
   if (matzaState.dragging === null) return
   const p = canvasCoords(e)
-  const em = matzaState.emojis[matzaState.dragging]
-  em.x = Math.max(0.05, Math.min(0.95, p.x - matzaState.dragOffset.x))
-  em.y = Math.max(0.05, Math.min(0.95, p.y - matzaState.dragOffset.y))
+  if (matzaState.dragging === 'text') {
+    matzaState.textPosition.x = Math.max(0.1, Math.min(0.9, p.x - matzaState.dragOffset.x))
+    matzaState.textPosition.y = Math.max(0.05, Math.min(0.95, p.y - matzaState.dragOffset.y))
+  } else {
+    const em = matzaState.emojis[matzaState.dragging]
+    em.x = Math.max(0.05, Math.min(0.95, p.x - matzaState.dragOffset.x))
+    em.y = Math.max(0.05, Math.min(0.95, p.y - matzaState.dragOffset.y))
+  }
   e.preventDefault()
 }
 
@@ -331,6 +369,20 @@ async function matzaRecord() {
   if (_matzaVideo) { _matzaVideo.currentTime = 0 }
   recorder.start()
   setTimeout(() => recorder.stop(), 6000)
+}
+
+function matzaSwitchVideo(videoId) {
+  const vid = MATZA_VIDEOS.find(v => v.id === videoId)
+  if (!vid || !_matzaVideo) return
+  matzaState.videoId = videoId
+  _matzaVideo.src = vid.src
+  _matzaVideo.load()
+  _matzaVideo.play().catch(() => {})
+  // Update picker UI
+  document.querySelectorAll('.matza-video-thumb').forEach(t => {
+    t.classList.toggle('active', t.dataset.id === videoId)
+  })
+  track('matza_video_switch', { video: videoId })
 }
 
 function matzaDownloadImage() {
@@ -467,6 +519,16 @@ function renderMatzaPage() {
         </div>
 
         <div class="matza-controls">
+
+          <div class="matza-section">
+            <h3 class="matza-section__title">🎥 בחרו סרטון</h3>
+            <div class="matza-video-picker">${MATZA_VIDEOS.map(v =>
+              `<button class="matza-video-thumb ${v.id === matzaState.videoId ? 'active' : ''}" data-id="${v.id}" onclick="matzaSwitchVideo('${v.id}')">
+                <video src="${v.src}" muted playsinline preload="metadata" class="matza-video-thumb__vid"></video>
+                <span class="matza-video-thumb__label">${v.label}</span>
+              </button>`
+            ).join('')}</div>
+          </div>
 
           <div class="matza-section">
             <h3 class="matza-section__title">🎨 הוסיפו אימוג׳ים</h3>
