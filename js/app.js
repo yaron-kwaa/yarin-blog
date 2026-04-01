@@ -1174,6 +1174,9 @@ function openAdminPanel() {
   // Collect chiki transfers
   const chikiTransfers = JSON.parse(localStorage.getItem('chiki_transfers') || '[]')
 
+  // Collect matza creations
+  const matzaCreations = JSON.parse(localStorage.getItem('matza_creations') || '[]')
+
   // Collect emails
   const emails = JSON.parse(localStorage.getItem('kolorabi_emails') || '[]')
   const emailsHTML = emails.length > 0
@@ -1225,6 +1228,10 @@ function openAdminPanel() {
             <span class="admin__stat-label">💰 סה״כ הועבר</span>
           </div>
           <div class="admin__stat-card">
+            <span class="admin__stat-num">${matzaCreations.length}</span>
+            <span class="admin__stat-label">🫓 מצות שלום</span>
+          </div>
+          <div class="admin__stat-card">
             <span class="admin__stat-num">${totalVisits}</span>
             <span class="admin__stat-label">👁️ צפיות</span>
           </div>
@@ -1257,6 +1264,25 @@ function openAdminPanel() {
         </div>
 
         <div class="admin__section">
+          <h2 class="admin__section-title">🫓 מצת שלום — יצירות</h2>
+          <p class="admin__note">${matzaCreations.length} מצות שלום נוצרו</p>
+          ${matzaCreations.length > 0
+            ? `<table class="admin__table">
+                <thead><tr><th>#</th><th>טקסט</th><th>שפה</th><th>אימוג׳ים</th><th>סרטון</th><th>תאריך</th><th>לינק</th></tr></thead>
+                <tbody>${matzaCreations.slice().reverse().map((c, i) => `<tr>
+                  <td>${matzaCreations.length - i}</td>
+                  <td class="admin__comment-text">${esc((c.text || '—')).slice(0, 50)}</td>
+                  <td>${esc(c.textLang || '—')}</td>
+                  <td>${c.emojis || 0}</td>
+                  <td>${esc(c.videoId || '—')}</td>
+                  <td>${new Date(c.date).toLocaleString('he-IL')}</td>
+                  <td><a href="${esc(c.link || '#')}" target="_blank" style="color:#F59E0B;">🔗</a></td>
+                </tr>`).join('')}</tbody>
+               </table>`
+            : '<p class="admin__empty">אין מצות שלום עדיין</p>'}
+        </div>
+
+        <div class="admin__section">
           <h2 class="admin__section-title">📩 אימיילים — רשימת המתנה לקולורבי</h2>
           <p class="admin__note">${emails.length} נרשמים</p>
           ${emailsHTML}
@@ -1274,6 +1300,7 @@ function openAdminPanel() {
             <button class="admin__action-btn admin__action-btn--danger" id="admin-clear-comments">מחק את כל התגובות</button>
             <button class="admin__action-btn admin__action-btn--danger" id="admin-clear-emails">מחק את כל האימיילים</button>
             <button class="admin__action-btn admin__action-btn--danger" id="admin-clear-chiki">מחק העברות אסירים</button>
+            <button class="admin__action-btn admin__action-btn--danger" id="admin-clear-matza">מחק מצות שלום</button>
             <button class="admin__action-btn" id="admin-clear-visits">אפס נתוני ביקורים</button>
             <button class="admin__action-btn" id="admin-export">📋 ייצא הכל (JSON)</button>
           </div>
@@ -1304,6 +1331,12 @@ function openAdminPanel() {
       openAdminPanel()
     }
   }
+  document.getElementById('admin-clear-matza').onclick = () => {
+    if (confirm('בטוח? זה ימחק את כל מצות השלום!!!')) {
+      localStorage.removeItem('matza_creations')
+      openAdminPanel()
+    }
+  }
   document.getElementById('admin-clear-visits').onclick = () => {
     if (confirm('בטוח? זה יאפס את נתוני הביקורים!!!')) {
       localStorage.removeItem('site_visits')
@@ -1311,7 +1344,7 @@ function openAdminPanel() {
     }
   }
   document.getElementById('admin-export').onclick = () => {
-    const data = { comments: {}, emails: emails, chikiTransfers: chikiTransfers, visits: visits }
+    const data = { comments: {}, emails: emails, chikiTransfers: chikiTransfers, matzaCreations: matzaCreations, visits: visits }
     POSTS.forEach(p => { data.comments[p.slug] = getComments(p.slug) })
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })
     const a = document.createElement('a')

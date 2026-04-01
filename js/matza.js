@@ -1,10 +1,12 @@
 // ============================================================
-// שלום-מצה — שלח מצה וירטואלית לחבר
+// מצת שלום — שלח מצת שלום בין העמים
 // ============================================================
 
 const MATZA_VIDEOS = [
   { id: 'matza-1', src: 'media/matza-1.mp4', label: 'מצה קלאסית' },
   { id: 'matza-2', src: 'media/matza-2.mp4', label: 'מצה באביב' },
+  { id: 'matza-3', src: 'media/matza-3.mp4', label: 'מצה מסתובבת' },
+  { id: 'matza-4', src: 'media/matza-4.mp4', label: 'מצה חגיגית' },
 ]
 
 const EMOJI_CATEGORIES = {
@@ -51,10 +53,9 @@ const BLESSING_PRESETS = {
 let matzaState = {
   videoId: 'matza-1',
   emojis: [],
-  text: '',
-  textLang: 'he',
-  textSize: 28,
-  textColor: '#FFFFFF',
+  texts: [],          // [{text, lang, x, y, size, color}]
+  activeTextIdx: -1,  // index of currently selected text for editing
+  currentLang: 'he',  // language tab for adding new text
   isRecording: false,
   dragging: null,
   dragOffset: { x: 0, y: 0 },
@@ -142,38 +143,48 @@ function drawMatzaFrame() {
     ctx.fillText(e.emoji, e.x * w, e.y * h)
   })
 
-  // Draw text
-  if (matzaState.text) {
-    const lang = BLESSING_PRESETS[matzaState.textLang]
+  // Draw all texts
+  matzaState.texts.forEach((t, idx) => {
+    if (!t.text) return
+    const lang = BLESSING_PRESETS[t.lang]
     const isRtl = lang ? lang.rtl : true
-    const fontSize = matzaState.textSize * (w / 540)
+    const fontSize = t.size * (w / 540)
     ctx.font = '700 ' + fontSize + 'px Rubik, sans-serif'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
     ctx.direction = isRtl ? 'rtl' : 'ltr'
 
-    const tx = matzaState.textPosition.x * w
-    const ty = matzaState.textPosition.y * h
+    const tx = t.x * w
+    const ty = t.y * h
 
-    // Shadow/outline for readability
     ctx.strokeStyle = 'rgba(0,0,0,0.7)'
     ctx.lineWidth = Math.max(3, fontSize / 8)
     ctx.lineJoin = 'round'
 
-    // Word wrap
-    const lines = wrapText(ctx, matzaState.text, w * 0.85)
+    const lines = wrapText(ctx, t.text, w * 0.85)
     const lineH = fontSize * 1.3
     const startY = ty - ((lines.length - 1) * lineH) / 2
 
     lines.forEach((line, i) => {
       const ly = startY + i * lineH
       ctx.strokeText(line, tx, ly)
-      ctx.fillStyle = matzaState.textColor
+      ctx.fillStyle = t.color
       ctx.fillText(line, tx, ly)
     })
 
-    ctx.direction = 'ltr' // reset
-  }
+    // Draw selection indicator for active text in edit mode
+    if (idx === matzaState.activeTextIdx) {
+      ctx.strokeStyle = '#F59E0B'
+      ctx.lineWidth = 2
+      ctx.setLineDash([6, 4])
+      const boxW = Math.max(...lines.map(l => ctx.measureText(l).width)) + 16
+      const boxH = lines.length * lineH + 12
+      ctx.strokeRect(tx - boxW / 2, startY - lineH / 2 - 6, boxW, boxH)
+      ctx.setLineDash([])
+    }
+
+    ctx.direction = 'ltr'
+  })
 
   _matzaAnimFrame = requestAnimationFrame(drawMatzaFrame)
 }
@@ -216,34 +227,44 @@ function hitTestEmoji(px, py) {
 }
 
 function hitTestText(px, py) {
-  if (!matzaState.text) return false
-  const tp = matzaState.textPosition
   const w = _matzaCanvas.width
   const h = _matzaCanvas.height
-  const fontSize = matzaState.textSize * (w / 540)
-  const textW = Math.min(0.85, matzaState.text.length * fontSize * 0.6 / w)
-  const textH = fontSize * 1.5 / h
-  return Math.abs(px - tp.x) < Math.max(0.15, textW / 2) && Math.abs(py - tp.y) < Math.max(0.05, textH)
+  for (let i = matzaState.texts.length - 1; i >= 0; i--) {
+    const t = matzaState.texts[i]
+    if (!t.text) continue
+    const fontSize = t.size * (w / 540)
+    const textW = Math.min(0.85, t.text.length * fontSize * 0.6 / w)
+    const textH = fontSize * 1.5 / h
+    if (Math.abs(px - t.x) < Math.max(0.15, textW / 2) && Math.abs(py - t.y) < Math.max(0.05, textH)) {
+      return i
+    }
+  }
+  return -1
 }
 
 function onMatzaPointerDown(e) {
   const p = canvasCoords(e)
-  // Check emojis first (on top), then text
-  const idx = hitTestEmoji(p.x, p.y)
-  if (idx >= 0) {
-    matzaState.dragging = idx
+  // Check emojis first (on top), then texts
+  const eidx = hitTestEmoji(p.x, p.y)
+  if (eidx >= 0) {
+    matzaState.dragging = { type: 'emoji', idx: eidx }
     matzaState.dragOffset = {
-      x: p.x - matzaState.emojis[idx].x,
-      y: p.y - matzaState.emojis[idx].y,
+      x: p.x - matzaState.emojis[eidx].x,
+      y: p.y - matzaState.emojis[eidx].y,
     }
     _matzaCanvas.setPointerCapture(e.pointerId)
     e.preventDefault()
-  } else if (hitTestText(p.x, p.y)) {
-    matzaState.dragging = 'text'
+    return
+  }
+  const tidx = hitTestText(p.x, p.y)
+  if (tidx >= 0) {
+    matzaState.dragging = { type: 'text', idx: tidx }
+    matzaState.activeTextIdx = tidx
     matzaState.dragOffset = {
-      x: p.x - matzaState.textPosition.x,
-      y: p.y - matzaState.textPosition.y,
+      x: p.x - matzaState.texts[tidx].x,
+      y: p.y - matzaState.texts[tidx].y,
     }
+    matzaUpdateTextUI()
     _matzaCanvas.setPointerCapture(e.pointerId)
     e.preventDefault()
   }
@@ -252,11 +273,13 @@ function onMatzaPointerDown(e) {
 function onMatzaPointerMove(e) {
   if (matzaState.dragging === null) return
   const p = canvasCoords(e)
-  if (matzaState.dragging === 'text') {
-    matzaState.textPosition.x = Math.max(0.1, Math.min(0.9, p.x - matzaState.dragOffset.x))
-    matzaState.textPosition.y = Math.max(0.05, Math.min(0.95, p.y - matzaState.dragOffset.y))
+  const d = matzaState.dragging
+  if (d.type === 'text') {
+    const t = matzaState.texts[d.idx]
+    t.x = Math.max(0.1, Math.min(0.9, p.x - matzaState.dragOffset.x))
+    t.y = Math.max(0.05, Math.min(0.95, p.y - matzaState.dragOffset.y))
   } else {
-    const em = matzaState.emojis[matzaState.dragging]
+    const em = matzaState.emojis[d.idx]
     em.x = Math.max(0.05, Math.min(0.95, p.x - matzaState.dragOffset.x))
     em.y = Math.max(0.05, Math.min(0.95, p.y - matzaState.dragOffset.y))
   }
@@ -269,10 +292,21 @@ function onMatzaPointerUp(e) {
 
 function onMatzaDblClick(e) {
   const p = canvasCoords(e)
-  const idx = hitTestEmoji(p.x, p.y)
-  if (idx >= 0) {
-    matzaState.emojis.splice(idx, 1)
+  const eidx = hitTestEmoji(p.x, p.y)
+  if (eidx >= 0) {
+    matzaState.emojis.splice(eidx, 1)
     track('matza_emoji_remove')
+    return
+  }
+  const tidx = hitTestText(p.x, p.y)
+  if (tidx >= 0) {
+    matzaState.texts.splice(tidx, 1)
+    if (matzaState.activeTextIdx >= matzaState.texts.length) {
+      matzaState.activeTextIdx = matzaState.texts.length - 1
+    }
+    matzaUpdateTextUI()
+    renderMatzaTextList()
+    track('matza_text_remove')
   }
 }
 
@@ -299,34 +333,115 @@ function matzaClearEmojis() {
   matzaState.emojis = []
 }
 
-// ---- Text ----
+// ---- Text (multi-text support) ----
 
-function matzaSetText(text) {
-  matzaState.text = text
+function matzaAddText(text, lang) {
+  lang = lang || matzaState.currentLang
+  // Position each new text at a different y
+  const yPositions = [0.85, 0.15, 0.50, 0.30, 0.70]
+  const y = yPositions[matzaState.texts.length % yPositions.length]
+  matzaState.texts.push({
+    text: text,
+    lang: lang,
+    x: 0.5,
+    y: y,
+    size: 28,
+    color: '#FFFFFF',
+  })
+  matzaState.activeTextIdx = matzaState.texts.length - 1
+  matzaUpdateTextUI()
+  renderMatzaTextList()
+  track('matza_text_add', { lang })
+}
+
+function matzaUpdateActiveText(text) {
+  const idx = matzaState.activeTextIdx
+  if (idx >= 0 && idx < matzaState.texts.length) {
+    matzaState.texts[idx].text = text
+  }
+}
+
+function matzaSelectText(idx) {
+  matzaState.activeTextIdx = idx
+  matzaUpdateTextUI()
+}
+
+function matzaUpdateTextUI() {
+  const idx = matzaState.activeTextIdx
   const input = document.getElementById('matza-text-input')
-  if (input && input.value !== text) input.value = text
-  track('matza_text_set', { lang: matzaState.textLang })
+  const colorInput = document.getElementById('matza-text-color')
+  const sizeInput = document.getElementById('matza-text-size')
+  if (idx >= 0 && idx < matzaState.texts.length) {
+    const t = matzaState.texts[idx]
+    if (input) input.value = t.text
+    if (colorInput) colorInput.value = t.color
+    if (sizeInput) sizeInput.value = t.size
+  } else {
+    if (input) input.value = ''
+    if (colorInput) colorInput.value = '#FFFFFF'
+    if (sizeInput) sizeInput.value = 28
+  }
+}
+
+function matzaSetActiveColor(color) {
+  const idx = matzaState.activeTextIdx
+  if (idx >= 0 && idx < matzaState.texts.length) {
+    matzaState.texts[idx].color = color
+  }
+}
+
+function matzaSetActiveSize(size) {
+  const idx = matzaState.activeTextIdx
+  if (idx >= 0 && idx < matzaState.texts.length) {
+    matzaState.texts[idx].size = parseInt(size)
+  }
+}
+
+function matzaRemoveText(idx) {
+  matzaState.texts.splice(idx, 1)
+  if (matzaState.activeTextIdx >= matzaState.texts.length) {
+    matzaState.activeTextIdx = matzaState.texts.length - 1
+  }
+  matzaUpdateTextUI()
+  renderMatzaTextList()
 }
 
 function matzaSetLang(lang) {
-  matzaState.textLang = lang
+  matzaState.currentLang = lang
   renderMatzaPresets()
 }
 
 function renderMatzaPresets() {
   const container = document.getElementById('matza-presets')
   if (!container) return
-  const lang = BLESSING_PRESETS[matzaState.textLang]
+  const lang = BLESSING_PRESETS[matzaState.currentLang]
   if (!lang) return
 
-  // Update tabs
   document.querySelectorAll('.matza-lang-tab').forEach(t => {
-    t.classList.toggle('active', t.dataset.lang === matzaState.textLang)
+    t.classList.toggle('active', t.dataset.lang === matzaState.currentLang)
   })
 
   container.innerHTML = lang.blessings.map(b =>
-    `<button class="matza-preset-btn" onclick="matzaSetText('${b.replace(/'/g, "\\'")}')">${b}</button>`
+    `<button class="matza-preset-btn" onclick="matzaAddText('${b.replace(/'/g, "\\'")}', '${matzaState.currentLang}')">${b}</button>`
   ).join('')
+}
+
+function renderMatzaTextList() {
+  const container = document.getElementById('matza-text-list')
+  if (!container) return
+  if (matzaState.texts.length === 0) {
+    container.innerHTML = '<p style="font-size:.8rem;color:#999;text-align:center;">לחצו על ברכה או כתבו משלכם</p>'
+    return
+  }
+  container.innerHTML = matzaState.texts.map((t, i) => {
+    const langLabel = BLESSING_PRESETS[t.lang] ? BLESSING_PRESETS[t.lang].label : t.lang
+    const isActive = i === matzaState.activeTextIdx
+    return `<div class="matza-text-item ${isActive ? 'matza-text-item--active' : ''}" onclick="matzaSelectText(${i})">
+      <span class="matza-text-item__lang">${langLabel}</span>
+      <span class="matza-text-item__text">${t.text.length > 30 ? t.text.slice(0, 30) + '...' : t.text}</span>
+      <button class="matza-text-item__remove" onclick="event.stopPropagation();matzaRemoveText(${i})">✕</button>
+    </div>`
+  }).join('')
 }
 
 // ---- Video export ----
@@ -357,7 +472,7 @@ async function matzaRecord() {
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'shalom-matza.webm'
+    a.download = 'matzat-shalom.webm'
     a.click()
     setTimeout(() => URL.revokeObjectURL(url), 5000)
     matzaState.isRecording = false
@@ -390,22 +505,41 @@ function matzaDownloadImage() {
   const url = _matzaCanvas.toDataURL('image/png')
   const a = document.createElement('a')
   a.href = url
-  a.download = 'shalom-matza.png'
+  a.download = 'matzat-shalom.png'
   a.click()
   track('matza_download_image')
 }
 
 // ---- Shareable link ----
 
-function matzaGenerateLink() {
+function matzaEncodeTexts() {
+  // Format: text|lang|x|y|size|color;text|lang|x|y|size|color
+  return matzaState.texts.map(t =>
+    encodeURIComponent(t.text) + '|' + t.lang + '|' + t.x.toFixed(2) + '|' + t.y.toFixed(2) + '|' + t.size + '|' + encodeURIComponent(t.color)
+  ).join(';')
+}
+
+function matzaDecodeTexts(str) {
+  return str.split(';').map(s => {
+    const [text, lang, x, y, size, color] = s.split('|')
+    return {
+      text: decodeURIComponent(text),
+      lang: lang || 'he',
+      x: parseFloat(x) || 0.5,
+      y: parseFloat(y) || 0.85,
+      size: parseInt(size) || 28,
+      color: color ? decodeURIComponent(color) : '#FFFFFF',
+    }
+  }).filter(t => t.text)
+}
+
+function matzaGenerateViewLink() {
   const params = new URLSearchParams()
+  params.set('m', 'view')
   params.set('v', matzaState.videoId)
-  if (matzaState.text) {
-    params.set('t', matzaState.text)
-    params.set('tl', matzaState.textLang)
+  if (matzaState.texts.length) {
+    params.set('txt', matzaEncodeTexts())
   }
-  if (matzaState.textColor !== '#FFFFFF') params.set('tc', matzaState.textColor)
-  if (matzaState.textSize !== 28) params.set('ts', matzaState.textSize)
   if (matzaState.emojis.length) {
     const enc = matzaState.emojis.map(e =>
       e.emoji + ',' + e.x.toFixed(2) + ',' + e.y.toFixed(2) + ',' + e.size
@@ -418,24 +552,56 @@ function matzaGenerateLink() {
 function matzaParseParams() {
   const hash = location.hash
   const qIdx = hash.indexOf('?')
-  if (qIdx === -1) return
+  if (qIdx === -1) return false
   const params = new URLSearchParams(hash.slice(qIdx + 1))
 
   if (params.get('v')) matzaState.videoId = params.get('v')
-  if (params.get('t')) matzaState.text = params.get('t')
-  if (params.get('tl')) matzaState.textLang = params.get('tl')
-  if (params.get('tc')) matzaState.textColor = params.get('tc')
-  if (params.get('ts')) matzaState.textSize = parseInt(params.get('ts'))
+
+  // New multi-text format
+  if (params.get('txt')) {
+    matzaState.texts = matzaDecodeTexts(params.get('txt'))
+  }
+  // Backwards compat: old single-text format
+  else if (params.get('t')) {
+    matzaState.texts = [{
+      text: params.get('t'),
+      lang: params.get('tl') || 'he',
+      x: parseFloat(params.get('tx')) || 0.5,
+      y: parseFloat(params.get('ty')) || 0.85,
+      size: parseInt(params.get('ts')) || 28,
+      color: params.get('tc') || '#FFFFFF',
+    }]
+  }
+
   if (params.get('e')) {
     matzaState.emojis = params.get('e').split(';').map(s => {
       const [emoji, x, y, size] = s.split(',')
       return { emoji, x: parseFloat(x), y: parseFloat(y), size: parseInt(size) }
     }).filter(e => e.emoji && !isNaN(e.x))
   }
+  return params.get('m') === 'view'
+}
+
+// ---- Save to localStorage for admin ----
+
+function matzaSaveCreation() {
+  const creations = JSON.parse(localStorage.getItem('matza_creations') || '[]')
+  const allTexts = matzaState.texts.map(t => t.text).join(' | ')
+  const langs = [...new Set(matzaState.texts.map(t => t.lang))].join(',')
+  creations.push({
+    date: new Date().toISOString(),
+    videoId: matzaState.videoId,
+    text: allTexts,
+    textLang: langs,
+    emojis: matzaState.emojis.length,
+    link: matzaGenerateViewLink(),
+  })
+  localStorage.setItem('matza_creations', JSON.stringify(creations))
 }
 
 function matzaCopyLink() {
-  const url = matzaGenerateLink()
+  const url = matzaGenerateViewLink()
+  matzaSaveCreation()
   navigator.clipboard.writeText(url).then(() => {
     const btn = document.getElementById('matza-copy-btn')
     if (btn) { btn.textContent = '✅ הועתק!'; setTimeout(() => btn.textContent = '🔗 העתק לינק', 2000) }
@@ -446,13 +612,14 @@ function matzaCopyLink() {
 // ---- Sharing ----
 
 async function matzaShareNative() {
-  const url = matzaGenerateLink()
+  const url = matzaGenerateViewLink()
+  matzaSaveCreation()
   track('matza_share_native')
   if (navigator.share) {
     try {
       await navigator.share({
-        title: 'שלום מצה! 🫓🕊️',
-        text: matzaState.text || 'חג פסח שמח! שלח/י מצת שלום',
+        title: 'מצת שלום! 🫓🕊️',
+        text: (matzaState.texts.length ? matzaState.texts[0].text : '') || 'מצת שלום בין העמים — חג פסח שמח!',
         url,
       })
     } catch (e) { /* user cancelled */ }
@@ -462,8 +629,10 @@ async function matzaShareNative() {
 }
 
 function matzaShareWhatsApp() {
-  const url = matzaGenerateLink()
-  const text = encodeURIComponent((matzaState.text || 'חג פסח שמח! 🫓🕊️') + '\n' + url)
+  const url = matzaGenerateViewLink()
+  matzaSaveCreation()
+  const shareText = matzaState.texts.length ? matzaState.texts[0].text : 'מצת שלום בין העמים! 🫓🕊️'
+  const text = encodeURIComponent(shareText + '\n' + url)
   window.open('https://wa.me/?text=' + text, '_blank')
   track('matza_share_whatsapp')
 }
@@ -472,13 +641,19 @@ function matzaShareWhatsApp() {
 
 function renderMatzaPage() {
   track('matza_page_view')
-  document.title = 'שלום-מצה 🫓🕊️ | הבלוג של ירין'
-
-  // Parse shared params if present
-  matzaParseParams()
+  document.title = 'מצת שלום 🫓🕊️ | הבלוג של ירין'
 
   // Stop previous animation if any
   if (_matzaAnimFrame) { cancelAnimationFrame(_matzaAnimFrame); _matzaAnimFrame = null }
+
+  // Reset state for fresh page
+  matzaState.texts = []
+  matzaState.emojis = []
+  matzaState.activeTextIdx = -1
+
+  // Parse shared params — returns true if view mode
+  const isViewMode = matzaParseParams()
+  if (isViewMode) { renderMatzaViewPage(); return }
 
   const videoSrc = (MATZA_VIDEOS.find(v => v.id === matzaState.videoId) || MATZA_VIDEOS[0]).src
 
@@ -495,16 +670,16 @@ function renderMatzaPage() {
 
   // Language tabs
   const langTabsHTML = Object.entries(BLESSING_PRESETS).map(([code, lang]) =>
-    `<button class="matza-lang-tab ${code === matzaState.textLang ? 'active' : ''}" data-lang="${code}" onclick="matzaSetLang('${code}')">${lang.label}</button>`
+    `<button class="matza-lang-tab ${code === matzaState.currentLang ? 'active' : ''}" data-lang="${code}" onclick="matzaSetLang('${code}')">${lang.label}</button>`
   ).join('')
 
   document.getElementById('main-content').innerHTML = `
     <div class="matza-page">
       <header class="matza-hero">
         <div class="container">
-          <h1 class="matza-hero__title">🫓 שלום-מצה 🕊️</h1>
-          <p class="matza-hero__sub">שלחו מצת שלום וירטואלית לחברים, למשפחה, ולכל העולם<br/>
-          <small>בעברית, אנגלית, פרסית, ערבית, ויידיש — כי שלום זה בכל שפה</small></p>
+          <h1 class="matza-hero__title">🫓 מצת שלום 🕊️</h1>
+          <p class="matza-hero__sub">מצת שלום בין העמים ובין היהודים — כי מצה היא הדרך לשלום. מי לא מסכים על לחם?!<br/>
+          <small>שלחו מצת שלום לחברים בעברית, אנגלית, פרסית, ערבית, ויידיש</small></p>
         </div>
       </header>
 
@@ -513,7 +688,7 @@ function renderMatzaPage() {
           <canvas id="matza-canvas" class="matza-canvas"></canvas>
           <video id="matza-video" src="${videoSrc}" muted loop playsinline preload="auto" style="display:none"></video>
           <div class="matza-canvas-hint" id="matza-hint">
-            <span>גררו אימוג׳ים על המצה</span>
+            <span>גררו אימוג׳ים וטקסטים על המצה</span>
             <small>לחצו פעמיים למחיקה</small>
           </div>
         </div>
@@ -541,21 +716,26 @@ function renderMatzaPage() {
           </div>
 
           <div class="matza-section">
-            <h3 class="matza-section__title">✍️ כתבו ברכה</h3>
+            <h3 class="matza-section__title">✍️ כתבו ברכות (אפשר כמה שפות!)</h3>
             <div class="matza-lang-tabs">${langTabsHTML}</div>
             <div class="matza-presets" id="matza-presets"></div>
-            <textarea id="matza-text-input" class="matza-text-input"
-              placeholder="או כתבו ברכה משלכם..."
-              oninput="matzaSetText(this.value)"
-              rows="2">${matzaState.text}</textarea>
-            <div class="matza-text-options">
+            <div style="display:flex;gap:6px;">
+              <textarea id="matza-text-input" class="matza-text-input"
+                placeholder="כתבו ברכה ולחצו +"
+                oninput="matzaUpdateActiveText(this.value)"
+                rows="2"></textarea>
+              <button class="matza-small-btn" style="font-size:1.2rem;padding:8px 14px;align-self:stretch;background:#F59E0B;color:#fff;font-weight:700;"
+                onclick="const inp=document.getElementById('matza-text-input');if(inp.value.trim()){matzaAddText(inp.value.trim());inp.value=''}">+</button>
+            </div>
+            <div id="matza-text-list" style="margin-top:.5rem;"></div>
+            <div class="matza-text-options" id="matza-text-options">
               <label class="matza-color-label">צבע:
-                <input type="color" value="${matzaState.textColor}"
-                  onchange="matzaState.textColor=this.value" class="matza-color-input" />
+                <input type="color" id="matza-text-color" value="#FFFFFF"
+                  onchange="matzaSetActiveColor(this.value)" class="matza-color-input" />
               </label>
               <label class="matza-size-label">גודל:
-                <input type="range" min="16" max="48" value="${matzaState.textSize}"
-                  oninput="matzaState.textSize=parseInt(this.value)" class="matza-size-input" />
+                <input type="range" id="matza-text-size" min="16" max="48" value="28"
+                  oninput="matzaSetActiveSize(this.value)" class="matza-size-input" />
               </label>
             </div>
           </div>
@@ -582,13 +762,14 @@ function renderMatzaPage() {
       </div>
 
       <div class="container matza-footer-note">
-        <p>🕊️ מיזם שלום של <strong>ירין</strong> ו<strong>אלברטו מוסקטו</strong> — כי מצה זה משהו שכולם יכולים להסכים עליו</p>
+        <p>🕊️ מיזם שלום של <strong>ירין</strong> ו<strong>אלברטו מוסקטו</strong> — מצת שלום בין העמים, כי מי לא מסכים על לחם?!</p>
       </div>
     </div>`
 
   window.scrollTo(0, 0)
   initMatzaCanvas()
   renderMatzaPresets()
+  renderMatzaTextList()
 
   // Hide hint after first emoji add
   const origAdd = matzaAddEmoji
@@ -599,16 +780,62 @@ function renderMatzaPage() {
   }
 }
 
+function renderMatzaViewPage() {
+  track('matza_view_page')
+  document.title = 'מצת שלום 🫓🕊️ | הבלוג של ירין'
+  matzaState.activeTextIdx = -1  // no selection in view mode
+
+  const videoSrc = (MATZA_VIDEOS.find(v => v.id === matzaState.videoId) || MATZA_VIDEOS[0]).src
+
+  document.getElementById('main-content').innerHTML = `
+    <div class="matza-page">
+      <header class="matza-hero">
+        <div class="container">
+          <h1 class="matza-hero__title">🫓 מצת שלום 🕊️</h1>
+          <p class="matza-hero__sub">מישהו שלח לכם מצת שלום!</p>
+        </div>
+      </header>
+
+      <div class="container" style="max-width:420px;margin:0 auto;padding:2rem 1rem;text-align:center;">
+        <div class="matza-canvas-wrap" style="margin:0 auto;">
+          <canvas id="matza-canvas" class="matza-canvas"></canvas>
+          <video id="matza-video" src="${videoSrc}" muted loop playsinline preload="auto" style="display:none"></video>
+        </div>
+
+        ${matzaState.texts.length ? matzaState.texts.map(t =>
+          `<p style="font-size:1.1rem;color:#92400E;font-weight:700;margin:.75rem 0 0;">״${t.text}״</p>`
+        ).join('') : ''}
+
+        <div style="display:flex;flex-direction:column;gap:10px;margin-top:1.5rem;">
+          <button class="matza-action-btn matza-action-btn--record" onclick="matzaRecord()">🎬 הורד סרטון</button>
+          <button class="matza-action-btn matza-action-btn--whatsapp" onclick="matzaShareWhatsApp()">💬 שתף בוואטסאפ</button>
+          <a class="matza-action-btn" href="#/shalom-matza"
+            style="background:linear-gradient(135deg,#F59E0B,#D97706);display:block;text-decoration:none;padding:14px 8px;border-radius:12px;font-size:1rem;font-weight:700;color:#fff;text-align:center;"
+            onclick="track('matza_create_own_click')">
+            🫓 צרו מצת שלום משלכם!
+          </a>
+        </div>
+
+        <div class="matza-footer-note">
+          <p>🕊️ מיזם שלום של <strong>ירין</strong> ו<strong>אלברטו מוסקטו</strong> — מצת שלום בין העמים, כי מי לא מסכים על לחם?!</p>
+        </div>
+      </div>
+    </div>`
+
+  window.scrollTo(0, 0)
+  initMatzaCanvas()
+}
+
 function renderMatzaBanner() {
   return `
     <div class="matza-banner" role="button" tabindex="0"
       onclick="track('matza_banner_click');window.location.hash='#/shalom-matza'"
       onkeydown="if(event.key==='Enter')window.location.hash='#/shalom-matza'"
-      aria-label="שלום-מצה — שלחו מצת שלום וירטואלית">
+      aria-label="מצת שלום — שלחו מצת שלום בין העמים">
       <div class="matza-banner__emojis" aria-hidden="true">🫓 🕊️ ☮️ ❤️ 🫒 🌸 🕊️ 🫓</div>
       <div class="matza-banner__center">
-        <p class="matza-banner__title">🫓 שלום-מצה 🕊️</p>
-        <p class="matza-banner__sub">שלחו מצת שלום וירטואלית לחברים — בעברית, אנגלית, פרסית, ערבית ויידיש</p>
+        <p class="matza-banner__title">🫓 מצת שלום 🕊️</p>
+        <p class="matza-banner__sub">מצת שלום בין העמים ובין היהודים — מי לא מסכים על לחם?!</p>
       </div>
       <div class="matza-banner__cta" aria-hidden="true">← צרו מצה</div>
     </div>`
