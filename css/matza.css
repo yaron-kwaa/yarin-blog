@@ -1,0 +1,315 @@
+/* ============================================================
+   שלום-מצה — שלח מצה וירטואלית לחבר
+   ============================================================ */
+
+/* ---- Hero ---- */
+.matza-hero {
+  background: linear-gradient(135deg, #FEF3C7 0%, #F59E0B33 50%, #FDE68A 100%);
+  padding: 2.5rem 1rem 2rem;
+  text-align: center;
+  border-bottom: 3px solid #F59E0B44;
+}
+.matza-hero__title {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: #92400E;
+  margin: 0 0 .5rem;
+}
+.matza-hero__sub {
+  font-size: 1.1rem;
+  color: #78350F;
+  margin: 0;
+  line-height: 1.6;
+}
+.matza-hero__sub small {
+  font-size: .85rem;
+  opacity: .8;
+}
+
+/* ---- Workspace layout ---- */
+.matza-workspace {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 2rem;
+  padding: 2rem 0;
+  align-items: flex-start;
+}
+.matza-canvas-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+.matza-canvas {
+  display: block;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.15);
+  background: #F5E6C8;
+  cursor: grab;
+}
+.matza-canvas:active { cursor: grabbing; }
+
+.matza-canvas-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,.6);
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: .8rem;
+  text-align: center;
+  pointer-events: none;
+}
+.matza-canvas-hint small {
+  display: block;
+  font-size: .7rem;
+  opacity: .7;
+}
+
+.matza-controls {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---- Sections ---- */
+.matza-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+}
+.matza-section__title {
+  margin: 0 0 .75rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #92400E;
+}
+
+/* ---- Emoji picker ---- */
+.matza-emoji-picker {
+  max-height: 220px;
+  overflow-y: auto;
+  padding-left: 4px;
+}
+.matza-emoji-cat__title {
+  font-size: .75rem;
+  color: #999;
+  margin: .5rem 0 .25rem;
+  font-weight: 600;
+}
+.matza-emoji-cat__grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+.matza-emoji-btn {
+  width: 40px;
+  height: 40px;
+  font-size: 1.4rem;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, transform .15s;
+}
+.matza-emoji-btn:hover { background: #FEF3C7; transform: scale(1.2); }
+.matza-emoji-btn:active { transform: scale(.95); }
+
+.matza-emoji-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: .5rem;
+}
+.matza-small-btn {
+  font-size: .75rem;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #F3F4F6;
+  color: #374151;
+  transition: background .15s;
+}
+.matza-small-btn:hover { background: #E5E7EB; }
+.matza-small-btn--danger { color: #DC2626; }
+.matza-small-btn--danger:hover { background: #FEE2E2; }
+
+/* ---- Language tabs ---- */
+.matza-lang-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: .75rem;
+  flex-wrap: wrap;
+}
+.matza-lang-tab {
+  font-size: .8rem;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: #F3F4F6;
+  color: #374151;
+  font-weight: 600;
+  transition: all .15s;
+}
+.matza-lang-tab.active {
+  background: #F59E0B;
+  color: #fff;
+}
+.matza-lang-tab:hover:not(.active) { background: #E5E7EB; }
+
+/* ---- Presets ---- */
+.matza-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: .75rem;
+}
+.matza-preset-btn {
+  font-size: .8rem;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: #FEF3C7;
+  color: #92400E;
+  border: 1px solid #FCD34D;
+  transition: all .15s;
+  text-align: start;
+}
+.matza-preset-btn:hover { background: #FDE68A; }
+
+/* ---- Text input ---- */
+.matza-text-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #E5E7EB;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color .15s;
+}
+.matza-text-input:focus { border-color: #F59E0B; outline: none; }
+
+.matza-text-options {
+  display: flex;
+  gap: 1rem;
+  margin-top: .5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.matza-color-label,
+.matza-size-label {
+  font-size: .8rem;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.matza-color-input {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.matza-size-input {
+  width: 100px;
+  accent-color: #F59E0B;
+}
+
+/* ---- Action buttons ---- */
+.matza-action-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.matza-action-btn {
+  padding: 12px 8px;
+  border-radius: 12px;
+  font-size: .9rem;
+  font-weight: 700;
+  color: #fff;
+  text-align: center;
+  transition: transform .15s, box-shadow .15s;
+}
+.matza-action-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.15); }
+.matza-action-btn:active { transform: scale(.97); }
+
+.matza-action-btn--record { background: linear-gradient(135deg, #EF4444, #DC2626); grid-column: 1 / -1; }
+.matza-action-btn--whatsapp { background: #25D366; }
+.matza-action-btn--share { background: linear-gradient(135deg, #8B5CF6, #7C3AED); }
+.matza-action-btn--link { background: #6B7280; grid-column: 1 / -1; }
+
+/* ---- Footer note ---- */
+.matza-footer-note {
+  text-align: center;
+  padding: 2rem 1rem;
+  font-size: .9rem;
+  color: #78350F;
+  opacity: .8;
+}
+
+/* ---- Home page banner ---- */
+.matza-banner {
+  background: linear-gradient(135deg, #FEF3C7 0%, #FDE68A 50%, #FCD34D 100%);
+  border-radius: 16px;
+  padding: 1.2rem;
+  margin: 1rem auto;
+  max-width: 800px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  transition: transform .2s, box-shadow .2s;
+  border: 2px solid #F59E0B44;
+}
+.matza-banner:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(245,158,11,.2); }
+
+.matza-banner__emojis {
+  font-size: 1.5rem;
+  letter-spacing: 4px;
+  white-space: nowrap;
+  display: none;
+}
+.matza-banner__center { flex: 1; text-align: center; }
+.matza-banner__title {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: #92400E;
+  margin: 0;
+}
+.matza-banner__sub {
+  font-size: .85rem;
+  color: #78350F;
+  margin: .25rem 0 0;
+}
+.matza-banner__cta {
+  background: #92400E;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: .85rem;
+  white-space: nowrap;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+  .matza-workspace {
+    flex-direction: column;
+    align-items: center;
+  }
+  .matza-canvas-wrap {
+    width: 100%;
+    max-width: 360px;
+  }
+  .matza-controls {
+    width: 100%;
+  }
+  .matza-hero__title { font-size: 2rem; }
+  .matza-action-btns { grid-template-columns: 1fr; }
+  .matza-action-btn--record,
+  .matza-action-btn--link { grid-column: auto; }
+}
+
+@media (min-width: 769px) {
+  .matza-banner__emojis { display: block; }
+  .matza-canvas-wrap { width: 360px; }
+}

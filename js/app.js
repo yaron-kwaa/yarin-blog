@@ -578,6 +578,9 @@ function renderHome() {
       </div>
     </section>
 
+    <!-- באנר שלום-מצה -->
+    ${renderMatzaBanner()}
+
     <!-- באנר צ'יקי-קנטיקי -->
     ${renderChikiBanner()}
 
@@ -1336,6 +1339,12 @@ function route() {
   _autoPopulate() // auto-generate comments silently
   _trackVisit()
   const hash = window.location.hash
+
+  // שלום-מצה
+  if (hash.startsWith('#/shalom-matza')) {
+    renderMatzaPage()
+    return
+  }
 
   // צ'יקי-קנטיקי
   if (hash === '#/chiki-kantiki') {
