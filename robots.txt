@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# Allow Google to show large image previews (required for Google Discover)
+# See: https://developers.google.com/search/docs/appearance/google-discover#images
+
+Sitemap: https://yarinkarnaval.sbs/sitemap.xml

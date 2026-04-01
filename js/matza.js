@@ -683,6 +683,23 @@ function matzaShareWhatsApp() {
 
 function renderMatzaPage() {
   track('matza_page_view')
+  if (typeof _updateSEO === 'function') _updateSEO({
+    title: 'מצת שלום 🫓🕊️ — שלחו מצת שלום בין העמים',
+    description: 'מצת שלום בין העמים ובין היהודים — כי מצה היא הדרך לשלום. מי לא מסכים על לחם?! שלחו ברכות בעברית, ערבית, יידיש, אנגלית ופרסית!',
+    image: 'https://yarinkarnaval.sbs/media/matza-og.jpg',
+    url: 'https://yarinkarnaval.sbs/#/shalom-matza',
+    type: 'website',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'WebApplication',
+      name: 'מצת שלום',
+      description: 'שלחו מצת שלום דיגיטלית לחברים בעברית, ערבית, יידיש, אנגלית ופרסית',
+      url: 'https://yarinkarnaval.sbs/#/shalom-matza',
+      inLanguage: ['he', 'ar', 'yi', 'en', 'fa'],
+      applicationCategory: 'EntertainmentApplication',
+      offers: { '@type': 'Offer', price: '0', priceCurrency: 'ILS' }
+    }
+  })
   document.title = 'מצת שלום 🫓🕊️ | הבלוג של ירין'
 
   // Stop previous animation if any

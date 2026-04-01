@@ -100,6 +100,9 @@ function setSort(s) {
 // מערכת תגובות אוטומטית — 50+ תגובות לכל פוסט על פני 48 שעות
 // ============================================================
 
+const _BASE_URL = 'https://yarinkarnaval.sbs'
+const _DEFAULT_IMG = _BASE_URL + '/media/matza-og.jpg'
+
 const _POST_PUB = {
   'rome':'2026-03-15T08:00','gan-tikva':'2026-03-16T09:00',
   'blue-falafel-eilat':'2026-03-17T10:00','beit-nekofa':'2026-03-18T07:00',
@@ -110,7 +113,40 @@ const _POST_PUB = {
   'toxic-fish-akko':'2026-03-25T09:00',
   'alberto-kohlrabi':'2026-03-27T08:00',
   'alberto-shopping-list':'2026-03-29T07:00',
-  'dance-retreat-pesach':'2026-03-28T09:00'
+  'dance-retreat-pesach':'2026-03-28T09:00',
+  'passover-potato-secret':'2026-03-30T10:00',
+  'theater-karov':'2026-03-31T09:00',
+  'matza-shalom-experiment':'2026-04-01T09:00',
+}
+
+// ---- SEO / Meta update ----
+function _updateSEO(opts) {
+  const title       = opts.title       || 'הבלוג של ירין 📝'
+  const desc        = opts.description || 'הבלוג הכי כייפי בישראל — ירין כותב על מקומות, אוכל ורעיונות עסקיים!!!'
+  const image       = opts.image       || _DEFAULT_IMG
+  const url         = opts.url         || _BASE_URL + '/'
+  const type        = opts.type        || 'website'
+
+  document.title = title
+
+  const sm = (sel, val) => { const e = document.querySelector(sel); if (e) e.content = val }
+  sm('meta[name="description"]',       desc)
+  sm('meta[property="og:title"]',      title)
+  sm('meta[property="og:description"]', desc)
+  sm('meta[property="og:image"]',      image)
+  sm('meta[property="og:url"]',        url)
+  sm('meta[property="og:type"]',       type)
+  sm('meta[name="twitter:title"]',     title)
+  sm('meta[name="twitter:description"]', desc)
+  sm('meta[name="twitter:image"]',     image)
+
+  const can = document.getElementById('canonical-link')
+  if (can) can.href = url
+
+  if (opts.jsonLd) {
+    const el = document.getElementById('page-json-ld')
+    if (el) el.textContent = JSON.stringify(opts.jsonLd)
+  }
 }
 const _AUT = [
   'עם ישראל','רק ביבי','פלפל מתוק','אוהב את המדינה','ימין חזק','שמאל מתון',
@@ -472,7 +508,30 @@ function renderRelated(post) {
 // ============================================================
 
 function renderHome() {
-  document.title = 'הבלוג של ירין'
+  _updateSEO({
+    title: 'הבלוג של ירין 📝 — מקומות, אוכל, ורעיונות עסקיים',
+    description: 'הבלוג הכי כייפי בישראל — ירין כותב על מקומות מדהימים, אוכל שמשנה חיים, ורעיונות עסקיים שהעולם מחכה להם. עכשיו: מצת שלום 🫓🕊️ — שלחו מצה לכולם בחמש שפות!!!',
+    image: _DEFAULT_IMG,
+    url: _BASE_URL + '/',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'Blog',
+      name: 'הבלוג של ירין',
+      description: 'פוסטים על מקומות מדהימים, אוכל שמשנה חיים, ורעיונות עסקיים',
+      url: _BASE_URL + '/',
+      inLanguage: 'he',
+      author: { '@type': 'Person', name: 'ירין' },
+      publisher: { '@type': 'Person', name: 'ירין' },
+      blogPost: POSTS.slice(0, 5).map(p => ({
+        '@type': 'BlogPosting',
+        headline: p.title,
+        description: p.teaser,
+        url: _BASE_URL + '/#/post/' + p.slug,
+        datePublished: _POST_PUB[p.slug] || '2026-03-15',
+        author: { '@type': 'Person', name: p.author || 'ירין' },
+      }))
+    }
+  })
 
   const filteredRaw = currentFilter === 'הכל'
     ? POSTS
@@ -670,11 +729,47 @@ function renderPost(slug) {
     return
   }
 
-  document.title = post.title + ' — הבלוג של ירין'
+  const postImg = (post.mainImage && post.mainImage.src)
+    ? (post.mainImage.src.startsWith('http') ? post.mainImage.src : _BASE_URL + '/' + post.mainImage.src.replace(/^\//, ''))
+    : _DEFAULT_IMG
+
+  _updateSEO({
+    title: post.title + ' — הבלוג של ירין',
+    description: post.teaser,
+    image: postImg,
+    url: _BASE_URL + '/#/post/' + post.slug,
+    type: 'article',
+    jsonLd: {
+      '@context': 'https://schema.org',
+      '@type': 'BlogPosting',
+      headline: post.title,
+      description: post.teaser,
+      image: [{ '@type': 'ImageObject', url: postImg, width: 1200, height: 630 }],
+      author: { '@type': 'Person', name: post.author || 'ירין' },
+      publisher: { '@type': 'Person', name: 'ירין', url: _BASE_URL },
+      datePublished: (_POST_PUB[post.slug] || '2026-03-15T08:00').slice(0, 10),
+      dateModified: (_POST_PUB[post.slug] || '2026-03-15T08:00').slice(0, 10),
+      url: _BASE_URL + '/#/post/' + post.slug,
+      inLanguage: 'he',
+      mainEntityOfPage: { '@type': 'WebPage', '@id': _BASE_URL + '/#/post/' + post.slug },
+      isPartOf: { '@type': 'Blog', name: 'הבלוג של ירין', url: _BASE_URL + '/' },
+      keywords: (post.category || '') + ', ' + (post.title.split(' ').slice(0, 5).join(', '))
+    }
+  })
 
   const paragraphs = post.content.map(p => {
     if (p === '___ANIMATION___') {
       return `<div style="margin:2rem 0;border-radius:14px;overflow:hidden;background:#111;box-shadow:0 4px 24px rgba(0,0,0,.4);"><canvas id="dance-canvas" style="width:100%;display:block;"></canvas></div>`
+    }
+    if (p === '___MATZA_CTA___') {
+      return `<div style="background:linear-gradient(135deg,#FEF3C7,#FDE68A88);border:2px solid #F59E0B;border-radius:16px;padding:24px 20px;text-align:center;margin:2.5rem 0;">
+        <p style="font-size:1.15rem;font-weight:800;color:#92400E;margin:0 0 10px;">🫓 שלחו גם אתם מצת שלום!</p>
+        <p style="color:#78350F;margin:0 0 18px;font-size:.95rem;line-height:1.6;">ברכות בעברית, ערבית, יידיש, אנגלית ופרסית — שתפו עם מי שאתם אוהבים!</p>
+        <button onclick="window.location.hash='#/shalom-matza';track('matza_cta_post_click')" style="background:linear-gradient(135deg,#F59E0B,#D97706);color:#fff;font-weight:800;padding:13px 30px;border:none;border-radius:9999px;cursor:pointer;font-size:1rem;box-shadow:0 4px 12px rgba(245,158,11,.4);">🫓 למצת שלום ←</button>
+      </div>`
+    }
+    if (p === '---') {
+      return `<hr style="border:none;border-top:2px dashed #E5E7EB;margin:2rem 0;" />`
     }
     return `<p class="post-content__para">${esc(p)}</p>`
   }).join('')
