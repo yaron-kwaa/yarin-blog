@@ -537,19 +537,29 @@ function matzaEncodeTexts() {
   ).join(';')
 }
 
-function matzaSmartDecode(str) {
-  // Detect still-encoded text from old double-encoded links (%D7%99... pattern)
-  if (/%[0-9A-Fa-f]{2}/.test(str)) {
-    try { return decodeURIComponent(str) } catch (e) { /* malformed, use as-is */ }
+function matzaFullDecode(str) {
+  // Repeatedly decode until no more %xx patterns remain.
+  // Handles any number of encoding layers from old links / WhatsApp resharing.
+  let prev = str
+  for (let i = 0; i < 5; i++) {
+    if (!/%[0-9A-Fa-f]{2}/.test(prev)) break
+    try {
+      const decoded = decodeURIComponent(prev)
+      if (decoded === prev) break
+      prev = decoded
+    } catch (e) { break }
   }
-  return str
+  return prev
 }
 
 function matzaDecodeTexts(str) {
+  // Fully decode the entire value first — this ensures | and ; separators
+  // are decoded even from old multi-encoded links
+  str = matzaFullDecode(str)
   return str.split(';').map(s => {
     const [text, lang, x, y, size, color] = s.split('|')
     return {
-      text: matzaSmartDecode(text || ''),
+      text: (text || '').replace(/\+/g, ' '),
       lang: lang || 'he',
       x: parseFloat(x) || 0.5,
       y: parseFloat(y) || 0.85,
@@ -591,7 +601,7 @@ function matzaParseParams() {
     // Backwards compat: old single-text format
     else if (params.get('t')) {
       matzaState.texts = [{
-        text: matzaSmartDecode(params.get('t')),
+        text: matzaFullDecode(params.get('t')).replace(/\+/g, ' '),
         lang: params.get('tl') || 'he',
         x: parseFloat(params.get('tx')) || 0.5,
         y: parseFloat(params.get('ty')) || 0.85,
@@ -601,7 +611,8 @@ function matzaParseParams() {
     }
 
     if (params.get('e')) {
-      matzaState.emojis = params.get('e').split(';').map(s => {
+      const emojiStr = matzaFullDecode(params.get('e'))
+      matzaState.emojis = emojiStr.split(';').map(s => {
         const [emoji, x, y, size] = s.split(',')
         return { emoji, x: parseFloat(x), y: parseFloat(y), size: parseInt(size) }
       }).filter(e => e.emoji && !isNaN(e.x))
