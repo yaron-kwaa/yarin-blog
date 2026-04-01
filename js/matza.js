@@ -455,24 +455,33 @@ async function matzaRecord() {
 
   matzaState.isRecording = true
   const btn = document.getElementById('matza-record-btn')
-  if (btn) { btn.textContent = '🔴 מקליט...'; btn.disabled = true }
+  let countdown = 6
+  if (btn) { btn.textContent = '⏳ מכין סרטון... ' + countdown; btn.disabled = true }
+  const countdownInterval = setInterval(() => {
+    countdown--
+    if (btn && countdown > 0) btn.textContent = '⏳ מכין סרטון... ' + countdown
+  }, 1000)
 
   track('matza_record_start')
 
   const stream = _matzaCanvas.captureStream(30)
-  const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
-    ? 'video/webm;codecs=vp9'
+  // Prefer mp4 (Safari), fallback to webm (Chrome/Firefox)
+  const mp4 = MediaRecorder.isTypeSupported('video/mp4')
+  const mimeType = mp4 ? 'video/mp4'
+    : MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9'
     : 'video/webm'
+  const ext = mp4 ? 'mp4' : 'webm'
   const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 2500000 })
   const chunks = []
 
   recorder.ondataavailable = e => { if (e.data.size) chunks.push(e.data) }
   recorder.onstop = () => {
+    clearInterval(countdownInterval)
     const blob = new Blob(chunks, { type: mimeType })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = 'matzat-shalom.webm'
+    a.download = 'matzat-shalom.' + ext
     a.click()
     setTimeout(() => URL.revokeObjectURL(url), 5000)
     matzaState.isRecording = false
