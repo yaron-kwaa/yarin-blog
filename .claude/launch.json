@@ -2,10 +2,10 @@
   "version": "0.0.1",
   "configurations": [
     {
-      "name": "blog",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": ["http-server", "-p", "8080", "-c-1"],
-      "port": 8080
+      "name": "blog-server",
+      "runtimeExecutable": "perl",
+      "runtimeArgs": ["server.pl"],
+      "port": 4200
     }
   ]
 }

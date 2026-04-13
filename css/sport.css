@@ -1,0 +1,141 @@
+/* ============================================================
+   ספורטוירין
+   ============================================================ */
+
+.sport-page { min-height: 100vh; background: #f4f6fb; }
+
+/* Hero */
+.sport-hero {
+  background: linear-gradient(135deg, #0d1b2a 0%, #1b2a3e 55%, #0f3460 100%);
+  color: white;
+  padding: 56px 24px 44px;
+  text-align: center;
+  position: relative;
+}
+.sport-hero__inner { max-width: 600px; margin: 0 auto; }
+.sport-back {
+  position: absolute; top: 18px; right: 20px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.25);
+  color: white; border-radius: 8px;
+  padding: 7px 16px; cursor: pointer;
+  font-size: .88rem; font-family: inherit;
+  transition: background .2s;
+}
+.sport-back:hover { background: rgba(255,255,255,.22); }
+.sport-title {
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 900; margin: 0 0 14px;
+  text-shadow: 0 2px 10px rgba(0,0,0,.4);
+}
+.sport-subtitle {
+  font-size: clamp(.88rem, 2vw, 1.05rem);
+  opacity: .72; line-height: 1.65;
+}
+
+/* Feed */
+.sport-feed {
+  max-width: 760px; margin: 0 auto;
+  padding: 32px 0 72px;
+  display: flex; flex-direction: column; gap: 18px;
+}
+
+/* Loading */
+.sport-loading { text-align: center; padding: 72px 0; color: #777; }
+.sport-loading-icon {
+  font-size: 2.8rem; margin-bottom: 18px;
+  display: inline-block;
+  animation: sport-bounce .8s ease-in-out infinite alternate;
+}
+@keyframes sport-bounce {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-12px); }
+}
+.sport-loading p { line-height: 1.8; }
+
+/* Error */
+.sport-error { text-align: center; padding: 56px 24px; color: #888; line-height: 1.8; }
+.sport-retry {
+  margin-top: 16px; padding: 10px 24px;
+  background: #0f3460; color: white;
+  border: none; border-radius: 8px;
+  cursor: pointer; font-family: inherit; font-size: .95rem;
+  transition: background .2s;
+}
+.sport-retry:hover { background: #1a4a80; }
+
+/* Card */
+.sport-card {
+  background: white; border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0,0,0,.06);
+  border-right: 4px solid #0f3460;
+  animation: sport-in .35s ease both;
+  transition: box-shadow .2s;
+}
+@keyframes sport-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.sport-card:hover { box-shadow: 0 4px 18px rgba(0,0,0,.1); }
+
+.sport-card__inner {
+  display: flex; align-items: stretch;
+}
+
+.sport-card__img-wrap {
+  flex-shrink: 0; width: 140px;
+  overflow: hidden; display: block;
+}
+.sport-card__img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  transition: transform .3s;
+}
+.sport-card:hover .sport-card__img { transform: scale(1.04); }
+
+.sport-card__content {
+  padding: 18px 20px; flex: 1; min-width: 0;
+}
+
+.sport-card__meta {
+  display: flex; align-items: center;
+  gap: 10px; margin-bottom: 8px;
+}
+.sport-card__num {
+  background: #0f3460; color: white;
+  border-radius: 50%;
+  width: 24px; height: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .72rem; font-weight: 700; flex-shrink: 0;
+}
+.sport-card__date { font-size: .76rem; color: #aaa; }
+
+.sport-card__title {
+  font-size: 1.02rem; font-weight: 700;
+  margin: 0 0 8px; line-height: 1.4;
+}
+.sport-card__title a { color: #111; text-decoration: none; }
+.sport-card__title a:hover { color: #0f3460; text-decoration: underline; }
+
+.sport-card__body {
+  font-size: .88rem; color: #444;
+  margin: 0; line-height: 1.65;
+}
+.sport-card__yarin {
+  color: #0f3460; font-style: italic; font-weight: 500;
+}
+
+/* Mobile — stack image on top */
+@media (max-width: 500px) {
+  .sport-card__inner { flex-direction: column; }
+  .sport-card__img-wrap { width: 100%; height: 160px; }
+}
+
+/* Mobile */
+@media (max-width: 640px) {
+  .sport-hero { padding: 56px 16px 32px; }
+  .sport-back { top: 12px; right: 12px; font-size: .8rem; padding: 6px 12px; }
+  .sport-feed { padding: 20px 16px 48px; }
+  .sport-card { padding: 16px; }
+}

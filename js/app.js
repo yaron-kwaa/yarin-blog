@@ -1567,6 +1567,13 @@ function route() {
   _trackVisit()
   const hash = window.location.hash
 
+  // ספורטוירין
+  if (hash === '#/sport') {
+    track('page_view', { page_title: 'ספורטוירין', page_path: '/sport' })
+    renderSportPage()
+    return
+  }
+
   // שלום-מצה
   if (hash.startsWith('#/shalom-matza')) {
     renderMatzaPage()
